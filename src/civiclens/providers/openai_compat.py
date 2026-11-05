@@ -15,12 +15,13 @@ from .base import ModelProvider, ProviderError, ProviderResult
 
 class OpenAICompatProvider(ModelProvider):
     def __init__(self, name: str, base_url: str, api_key: str, model: str,
-                 extra_headers: dict[str, str] | None = None, client: httpx.Client | None = None,
+                 extra_headers: dict[str, str] | None = None, extra_body: dict | None = None, client: httpx.Client | None = None,
                  timeout_s: float = 60.0) -> None:
         self.name = name
         self._url = base_url.rstrip("/") + "/chat/completions"
         self._model = model
         self._headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json", **(extra_headers or {})}
+        self._extra_body = extra_body or {}
         self._client = client or httpx.Client(timeout=timeout_s)
 
     def generate(self, prompt: str, image_bytes: bytes | None = None, mime_type: str = "image/jpeg") -> ProviderResult:
@@ -28,7 +29,7 @@ class OpenAICompatProvider(ModelProvider):
         if image_bytes:
             b64 = base64.b64encode(image_bytes).decode("ascii")
             content.append({"type": "image_url", "image_url": {"url": f"data:{mime_type};base64,{b64}"}})
-        body = {"model": self._model, "temperature": 0.2, "messages": [{"role": "user", "content": content}]}
+        body = {"model": self._model, "temperature": 0.2, "messages": [{"role": "user", "content": content}], **self._extra_body}
         start = time.perf_counter()
         try:
             resp = self._client.post(self._url, headers=self._headers, json=body)

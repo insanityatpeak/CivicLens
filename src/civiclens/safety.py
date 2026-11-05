@@ -113,6 +113,11 @@ def validate_draft(draft: ComplaintDraft, analysis: ImageAnalysis, ctx: UserCont
     for i, ev in enumerate(draft.observed_evidence):
         if ev.strip() not in mapped:
             issues.append(Issue("unmapped_evidence", "evidence line has no entry in claim_sources", f"observed_evidence[{i}]"))
+        else:
+            srcs = {c.source.strip() for c in draft.claim_sources if c.statement.strip() == ev.strip()}
+            if not any(s in obs and obs[s].type == "observed" for s in srcs):
+                issues.append(Issue("inferred_as_evidence", "'what the photo shows' may only list things directly observed in the photo; "
+                                    "move inferences to public_impact", f"observed_evidence[{i}]"))
 
     # Location must come from the user
     if "location_text" not in user_fields and draft.location and draft.location.strip():
@@ -153,10 +158,15 @@ def validate_draft(draft: ComplaintDraft, analysis: ImageAnalysis, ctx: UserCont
         parts += [(f"observed_evidence[{i}]", t) for i, t in enumerate(draft.observed_evidence)]
         parts += [(f"claim[{i}]", c.statement) for i, c in enumerate(draft.claim_sources) if not c.source.startswith("user:")]
         for where, text in parts:
-            if text.strip() and devanagari_ratio(text) < 0.5:
-                issues.append(Issue("wrong_language", "text is not written in Hindi (Devanagari)", where))
-            for word in _stray_english(text, allowed_text):
-                issues.append(Issue("english_in_hindi", f"English word {word!r} left in Hindi text; translate it", where))
+            if not text.strip():
+                continue
+            if devanagari_ratio(text) < 0.5:
+                issues.append(Issue("wrong_language", "text is not written in Hindi (Devanagari); translate all of it", where))
+                continue
+            words = _stray_english(text, allowed_text)
+            if words:
+                more = f" (+{len(words) - 4} more)" if len(words) > 4 else ""
+                issues.append(Issue("english_in_hindi", f"English words left in Hindi text: {', '.join(words[:4])}{more}; translate them", where))
     if expected_language and draft.language != expected_language:
         issues.append(Issue("wrong_language", f"draft language is {draft.language!r}, expected {expected_language!r}"))
 

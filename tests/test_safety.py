@@ -113,3 +113,19 @@ def test_acronyms_and_user_typed_words_are_allowed_in_hindi(analysis):
     d = d.model_copy(update={"description": "गली no. 4, Jangammet में कचरा है। कृपया BBMP या SMS से सूचित करें।"})
     codes_ = {i.code for i in validate_draft(d, analysis, ctx, "hi").issues}
     assert "english_in_hindi" not in codes_
+
+
+def test_many_english_words_make_one_issue_per_text_part(analysis, ctx):
+    d = hindi(make(analysis)).model_copy(update={"observed_evidence": ["A large pile of garbage along the wall"]})
+    report = validate_draft(d, analysis, ctx, "hi")
+    hits = [i for i in report.issues if i.where == "observed_evidence[0]" and i.code in ("wrong_language", "english_in_hindi")]
+    assert len(hits) == 1
+
+
+def test_inference_listed_as_photo_evidence_is_caught(analysis, ctx):
+    inferred = next(o for o in analysis.observations if o.type == "inferred")
+    stmt = "This may be dangerous for vehicles"
+    d = make(analysis)
+    d = d.model_copy(update={"observed_evidence": [*d.observed_evidence, stmt],
+                             "claim_sources": [*d.claim_sources, d.claim_sources[0].model_copy(update={"statement": stmt, "source": inferred.id})]})
+    assert "inferred_as_evidence" in codes(validate_draft(d, analysis, ctx, "en"))
