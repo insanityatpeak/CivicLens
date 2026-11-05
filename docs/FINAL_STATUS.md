@@ -1,7 +1,7 @@
 # CivicLens Final Status
 
 Date: 2026-11-05. Repo: https://github.com/insanityatpeak/CivicLens (public). Live: https://civiclens-prns.onrender.com/ (Render free tier).
-Stack: FastAPI backend + static single-page frontend; Groq (primary) with OpenRouter (fallback); Gemini optional; labeled demonstration fallback.
+Stack: FastAPI backend + static single-page frontend; Groq (primary), OpenRouter then Gemini (fallbacks); labeled demonstration fallback.
 
 ## Features
 **Implemented and verified** (run and seen)
@@ -29,7 +29,7 @@ Stack: FastAPI backend + static single-page frontend; Groq (primary) with OpenRo
 - Real evaluation/metrics (no labeled photo set); face and plate blurring; official reporting-channel links; screenshots in the repo; LICENSE; bring-your-own-key; global rate limiting.
 
 ## AI models and keys
-- Primary: Groq `qwen/qwen3.8-27b`. Fallback: OpenRouter `nvidia/nemotron-3.5-super-vl:free` (reasoning off). Optional: Gemini `gemini-2.5-flash`. Keys come from environment variables (`GROQ_API_KEY`, `OPENROUTER_API_KEY`, `GEMINI_API_KEY`), never committed. Temperature 0.2.
+- Primary: Groq `qwen/qwen3.8-27b`. Fallback: OpenRouter `nvidia/nemotron-3.5-super-vl:free` (reasoning off). Second fallback: Gemini `gemini-2.5-flash` (wired in; NOT yet run in this configuration, no key set yet). Keys come from environment variables (`GROQ_API_KEY`, `OPENROUTER_API_KEY`, `GEMINI_API_KEY`), never committed. Temperature 0.2.
 - Free-tier limits observed: Groq 1,000 output and 7,000 input tokens per minute for this model; OpenRouter free models 50 requests per day (1,000 with $10 credit); Gemini free about 20 requests per day (exhausted earlier). Models rotate: two default ids returned 404 and were replaced from live catalogues.
 
 ## Files
@@ -45,7 +45,7 @@ Dockerfile, render.yaml       deployment files
 ```
 
 ## Tests
-`78 passed` and ruff clean (2026-11-05). They use scripted, canned or mocked-HTTP providers: they test logic, not model quality. Browser checks were scripted with Playwright (not part of the repo test suite).
+`79 passed` and ruff clean (2026-11-05). They use scripted, canned or mocked-HTTP providers: they test logic, not model quality. Browser checks were scripted with Playwright (not part of the repo test suite).
 
 ## Evaluation
 None. `eval/REPORT.md` says so. Real-model checks so far are single runs: Groq English and Hindi drafts on two photos (all validator-pass), OpenRouter Hindi N=8 (all pass after retry, median 7.6 s), no ground-truth labels, same author as the prompts.

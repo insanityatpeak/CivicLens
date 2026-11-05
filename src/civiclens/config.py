@@ -40,8 +40,8 @@ def _key(name: str) -> str | None:
 
 def load_settings() -> Settings:
     load_dotenv()
-    raw = os.getenv("CIVICLENS_PROVIDER", "groq,openrouter")
-    order = tuple(p.strip().lower() for p in raw.split(",") if p.strip()) or ("groq", "openrouter")
+    raw = os.getenv("CIVICLENS_PROVIDER", "groq,openrouter,gemini")
+    order = tuple(p.strip().lower() for p in raw.split(",") if p.strip()) or ("groq", "openrouter", "gemini")
     return Settings(
         providers=order,
         gemini_model=os.getenv("GEMINI_MODEL", DEFAULT_GEMINI_MODEL).strip(),

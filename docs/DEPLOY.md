@@ -11,7 +11,7 @@ Python 3.12 and a start command can run it. Verified only on a local Windows mac
 pip install -r requirements.txt
 uvicorn civiclens.web.server:app --app-dir src --host 0.0.0.0 --port $PORT
 ```
-Environment variables (set as host secrets, never commit): `GROQ_API_KEY` (primary), `OPENROUTER_API_KEY` (fallback), optional `GROQ_MODEL`, `OPENROUTER_MODEL`, `CIVICLENS_PROVIDER` (default `groq,openrouter`). Model ids in `.env.example` are UNVERIFIED defaults: confirm each is vision-capable in the provider's catalogue.
+Environment variables (set as host secrets, never commit): `GROQ_API_KEY` (primary), `OPENROUTER_API_KEY` (first fallback), `GEMINI_API_KEY` (second fallback, optional), optional `GROQ_MODEL`, `OPENROUTER_MODEL`, `GEMINI_MODEL`, `CIVICLENS_PROVIDER` (default `groq,openrouter,gemini`; providers without a key are skipped). On Render, add `GEMINI_API_KEY` under Environment and set `CIVICLENS_PROVIDER` to `groq,openrouter,gemini` (an existing service keeps its old value until you change it). Model ids in `.env.example` are UNVERIFIED defaults: confirm each is vision-capable in the provider's catalogue.
 Python 3.12 recommended. The two CC0 example photos in `data/samples/` (`pothole.jpg`, `garbage.jpg`) are exempted from the ignore rule so they ship with the repo; the three user-supplied images stay local.
 
 ## One-click files

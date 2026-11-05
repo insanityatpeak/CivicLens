@@ -37,11 +37,11 @@ flowchart LR
   G --> D[Editable draft + source table<br/>+ warnings]
 ```
 - **Two stages** separate *seeing* from *writing*: the writer never sees pixels, only ledger entries, so claims can be checked against ids.
-- **Provider abstraction** (`ModelProvider`): Groq is the primary provider and OpenRouter the automatic fallback (a `FallbackChain` moves on only when a call fails: quota, network, refusal); swapping models does not touch app logic.
+- **Provider abstraction** (`ModelProvider`): Groq is the primary provider, with OpenRouter then Gemini as automatic fallbacks (a `FallbackChain` moves on only when a call fails: quota, network, refusal); swapping models does not touch app logic.
 - **Demonstration fallback:** a clearly labeled, canned offline mode so the flow can be walked without a key. It is **not AI**, never looks at the photo, and only activates when you choose it.
 
 ## Technology stack
-Python 3.12 · FastAPI + Uvicorn (backend) · vanilla HTML/CSS/JS single-page frontend (no build step) · Groq (primary) with OpenRouter (fallback) over OpenAI-compatible HTTPS via `httpx`; Google Gemini optional via `google-genai`; models configurable in `.env` · Pydantic · Pillow · pytest · ruff.
+Python 3.12 · FastAPI + Uvicorn (backend) · vanilla HTML/CSS/JS single-page frontend (no build step) · Groq (primary), then OpenRouter, then Google Gemini as fallbacks (Groq and OpenRouter over OpenAI-compatible HTTPS via `httpx`; Gemini via `google-genai`); models configurable in `.env` · Pydantic · Pillow · pytest · ruff.
 
 ## Installation and setup
 ```
@@ -49,7 +49,7 @@ python -m venv .venv
 .venv\Scripts\activate          # macOS/Linux: source .venv/bin/activate
 pip install -r requirements.txt
 copy .env.example .env          # macOS/Linux: cp .env.example .env
-# edit .env: set GROQ_API_KEY (https://console.groq.com/keys) and OPENROUTER_API_KEY (https://openrouter.ai/keys)
+# edit .env: set GROQ_API_KEY (https://console.groq.com/keys), OPENROUTER_API_KEY (https://openrouter.ai/keys), GEMINI_API_KEY (https://aistudio.google.com/apikey)
 ```
 Never commit `.env`. For development tools: `pip install -r requirements-dev.txt`.
 
@@ -62,7 +62,7 @@ No key yet? Click **Use demonstration fallback** in the app (it appears when no 
 ```
 python scripts/spike.py [image]                     # one real model call + Hindi check
 python scripts/run_pipeline.py photo.jpg --lang hi  # full pipeline in the terminal
-pytest                                              # 78 tests (logic, not model quality)
+pytest                                              # 79 tests (logic, not model quality)
 ```
 
 ## How to use
@@ -75,7 +75,7 @@ pytest                                              # 78 tests (logic, not model
 ## Evaluation results
 **No real evaluation has been run.** There is no labeled photo set yet, so there are no accuracy, latency or Hindi-quality numbers to report. Small single-run checks (not an evaluation) used real models: vision on the pothole, garbage and three user photos; English and Hindi drafts on two photos via Groq (all passed the validator); OpenRouter Hindi drafts N=8 (all passed after the automatic retry, median 7.6 s). Accuracy of photo reading against labels has not been measured. The harness exists and is tested: `python eval/run_eval.py --split test` (see [`eval/REPORT.md`](eval/REPORT.md) for the dataset checklist, method and threats to validity). Runs on the demonstration fallback are stamped *harness test only*.
 
-What *is* verified (see `docs/PROJECT_STATE.md` for exact commands and outputs): 78 unit and HTTP-level tests pass, including injected fabrications being caught by the validator and provider fallback order; lint is clean; install works in a fresh virtual environment; a scan found no secrets in the tree or git history. These tests use a scripted or canned provider, so they say nothing about model quality.
+What *is* verified (see `docs/PROJECT_STATE.md` for exact commands and outputs): 79 unit and HTTP-level tests pass, including injected fabrications being caught by the validator and provider fallback order; lint is clean; install works in a fresh virtual environment; a scan found no secrets in the tree or git history. These tests use a scripted or canned provider, so they say nothing about model quality.
 
 ## Limitations
 - Real-model behavior is barely measured: category accuracy from real photos, the vision prompt, Hindi quality (readable to the assistant, not reviewed by a native speaker), and whether generating Hindi directly beats translating are all **unmeasured**.

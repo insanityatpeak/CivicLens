@@ -11,7 +11,7 @@ services:
       - key: PYTHON_VERSION
         value: 3.12.7
       - key: CIVICLENS_PROVIDER
-        value: groq,openrouter
+        value: groq,openrouter,gemini
       - key: GROQ_MODEL
         value: qwen/qwen3.8-27b
       - key: OPENROUTER_MODEL
@@ -19,4 +19,6 @@ services:
       - key: GROQ_API_KEY
         sync: false
       - key: OPENROUTER_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
         sync: false

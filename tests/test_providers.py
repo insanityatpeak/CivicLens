@@ -106,6 +106,19 @@ def test_get_provider_order_and_skipping():
     assert get_provider(settings(groq_api_key="g")).name == "groq"
 
 
+def test_default_chain_is_groq_then_openrouter_then_gemini(monkeypatch):
+    for k in ("CIVICLENS_PROVIDER", "GROQ_API_KEY", "OPENROUTER_API_KEY", "GEMINI_API_KEY"):
+        monkeypatch.delenv(k, raising=False)
+    monkeypatch.setattr("civiclens.config.load_dotenv", lambda: None)
+    from civiclens.config import load_settings
+
+    assert load_settings().providers == ("groq", "openrouter", "gemini")
+    chain = get_provider(settings(providers=("groq", "openrouter", "gemini"), groq_api_key="g", openrouter_api_key="o", gemini_api_key="k"))
+    assert [p.name for p in chain.providers] == ["groq", "openrouter", "gemini"]
+    skipped = get_provider(settings(providers=("groq", "openrouter", "gemini"), groq_api_key="g", gemini_api_key="k"))
+    assert [p.name for p in skipped.providers] == ["groq", "gemini"]
+
+
 def test_get_provider_errors_and_mock():
     with pytest.raises(ConfigError, match="GROQ_API_KEY"):
         get_provider(settings())
