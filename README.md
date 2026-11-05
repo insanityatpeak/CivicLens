@@ -41,7 +41,7 @@ flowchart LR
 - **Demonstration fallback:** a clearly labeled, canned offline mode so the flow can be walked without a key. It is **not AI**, never looks at the photo, and only activates when you choose it.
 
 ## Technology stack
-Python 3.12 · Streamlit · Google Gemini via `google-genai` (primary provider, default model `gemini-2.5-flash`, configurable) · Pydantic · Pillow · pytest · ruff.
+Python 3.12 · FastAPI + Uvicorn (backend) · vanilla HTML/CSS/JS single-page frontend (no build step) · Google Gemini via `google-genai` (primary provider, default model `gemini-2.5-flash`, configurable) · Pydantic · Pillow · pytest · ruff.
 
 ## Installation and setup
 ```
@@ -55,13 +55,14 @@ Never commit `.env`. For development tools: `pip install -r requirements-dev.txt
 
 ## Run locally
 ```
-streamlit run app.py
+uvicorn civiclens.web.server:app --app-dir src --port 8000
+# then open http://localhost:8000
 ```
-No key yet? Click **Use demonstration fallback** in the app, or set `CIVICLENS_PROVIDER=mock`. Other commands:
+No key yet? Click **Use demonstration fallback** in the app (it appears when no key is set), or set `CIVICLENS_PROVIDER=mock`. Other commands:
 ```
 python scripts/spike.py [image]                     # one real model call + Hindi check
 python scripts/run_pipeline.py photo.jpg --lang hi  # full pipeline in the terminal
-pytest                                              # 52 tests (logic, not model quality)
+pytest                                              # 58 tests (logic, not model quality)
 ```
 
 ## How to use
@@ -83,6 +84,7 @@ What *is* verified (see `docs/PROJECT_STATE.md` for exact commands and outputs):
 - Face and number-plate **blurring is not implemented**; the app only warns.
 - The per-session usage cap is soft, not a global rate limit. A shared API key on a public deployment can still be exhausted.
 - UI visuals and mobile layout have not been checked in a real browser.
+- The Gemini free tier allowed about 20 requests per day for this model when tested (quota ran out during testing), and one analysis plus one draft uses 2 requests. A shared public demo would exhaust it quickly.
 - Not deployed.
 
 ## Responsible AI and privacy

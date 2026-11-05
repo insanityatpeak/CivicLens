@@ -3,7 +3,7 @@ Last updated: 2026-11-05
 Submission status: unknown. Original deadline Nov 4 2026 8:00 PM IST has passed; user not yet asked whether extended.
 
 ## Decisions
-- Streamlit + Gemini primary + labeled mock fallback; evidence-ledger concept (phase 1, assistant defaults; user opted out of questions). See docs/DECISIONS.md.
+- FastAPI + static SPA frontend (replaced Streamlit, user choice, see docs/UI_DESIGN.md) + Gemini primary + labeled mock fallback; evidence-ledger concept (phase 1, assistant defaults; user opted out of questions). See docs/DECISIONS.md.
 
 ## Phase status
 | Phase | Status | Verified? | Commit |
@@ -17,9 +17,9 @@ Submission status: unknown. Original deadline Nov 4 2026 8:00 PM IST has passed;
 ## Files
 - GitHub: https://github.com/insanityatpeak/CivicLens (public, main)
 - src/civiclens/config.py env loading; providers/{base,gemini,mock}.py provider abstraction
-- scripts/spike.py AI spike; app.py Streamlit skeleton
+- scripts/spike.py AI spike
 - src/civiclens/{schemas,analysis,complaint,safety,i18n,parsing}.py: Phase 2 pipeline; tests/ (33 tests); scripts/run_pipeline.py
-- app.py UI; src/civiclens/{ui_theme,export}.py; .streamlit/config.toml; providers/mock.py = labeled canned fallback with 3 scenarios
+- src/civiclens/web/{server.py,static/{index.html,app.css,app.js,i18n.js}} UI + API; src/civiclens/export.py; providers/mock.py = labeled canned fallback with 3 scenarios
 - eval/run_eval.py, eval/dataset.csv (header only), eval/REPORT.md (states no eval run), src/civiclens/evalmetrics.py, tests/test_eval.py; requirements-dev.txt
 - docs/DECISIONS.md, docs/plans/phase-1-plan.md, data/SOURCES.md
 
@@ -29,7 +29,7 @@ python -m venv .venv && .venv\Scripts\activate
 pip install -r requirements.txt
 copy .env.example .env   # add GEMINI_API_KEY
 python scripts/spike.py [data/samples/pothole.jpg]
-streamlit run app.py
+uvicorn civiclens.web.server:app --app-dir src --port 8000
 ```
 
 ## Verification log
@@ -57,6 +57,9 @@ streamlit run app.py
 - Real-model stage-2 smoke test (SYNTHETIC hand-written pothole ledger, not model-read photos; N=3 runs, NOT an evaluation): EN with location, HI with location, EN without location -> all 3 `validator_passed=True`, `regenerated=False`, latency 7.8-8.9s, no invented location/date/department/phone; no-location draft set location null and listed it in missing_info (VERIFIED, observed output). Quirks seen: EN draft hedged a user-stated fact ("appears to be ongoing"); HI claim table entry for ongoing had statement "yes" (shows oddly in the UI source table; not yet fixed); HI draft kept the user's English location verbatim (expected).
 - Console fix: scripts printed Hindi -> UnicodeEncodeError on Windows cp1252; scripts/spike.py, run_pipeline.py, eval/run_eval.py now force UTF-8 stdout (VERIFIED by rerun).
 - Phase 5: `pytest -q` -> `52 passed in 7.43s` (VERIFIED; adds tests that a real-provider session is capped at 10 analyses via dummy key, and that fallback sessions are not capped). ruff clean.
+- Phase 6 (2026-11-05): real runs on 4 photos earlier today: garbage dumping (faces flagged, EN draft passed validator), litter by wall (EN draft passed), crowded train (classified other_civic_issue; EN draft about overcrowding passed validator; over-acceptance concern), pothole.jpg (analysis OK; draft hit 503). Then `429 RESOURCE_EXHAUSTED`: Gemini free tier limit 20 requests/day for gemini-2.5-flash exhausted; ~17.5h to reset. Rehearsal of Hindi-from-photo and pothole draft therefore NOT DONE.
+- Demo script timing by word count: 191 words = ~76-88 s at 130-150 wpm; 30 s version 66 words = ~26-30 s (computed by script, not read aloud).
+- Another session is rebuilding the UI (src/civiclens/web/, tests/test_web.py, staged deletion of tests/test_app_flow.py). Not touched or committed by this session. Working-tree `pytest` today: 58 passed (includes that session's tests); committed main: 52.
 - Auto-blurring of faces/plates: NOT IMPLEMENTED (future work); privacy_flags reporting implemented, UI warning is Phase 3.
 
 ## Known issues / limitations
