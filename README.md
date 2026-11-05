@@ -3,10 +3,10 @@
 *See a Problem. Report a Solution.*
 
 
-**Code:** https://github.com/insanityatpeak/CivicLens · **Live demo:** not deployed yet
+**Code:** https://github.com/insanityatpeak/CivicLens · **Live demo:** https://civiclens-prns.onrender.com/ (free tier: the first load after idle can take about a minute)
 
 
-> **Status: working prototype.** The full flow runs and is tested (52 passing tests). It has **not** yet been evaluated against a real model or a labeled photo set, and it is **not deployed**. See [Evaluation](#evaluation-results) and [Limitations](#limitations).
+> **Status: working prototype.** The full flow runs and is tested (72 passing tests) and is deployed on Render. It has **not** yet been evaluated on a labeled photo set: real-model runs so far are single smoke tests, not measurements. See [Evaluation](#evaluation-results) and [Limitations](#limitations).
 
 ## The problem
 Reporting a pothole, a garbage pile or stagnant water is a hassle: you must pick the right category, find the right department, write a convincing complaint, often in a language that is not your own, and include details (where? how long?) that you may not think about. So most issues go unreported.
@@ -85,7 +85,7 @@ What *is* verified (see `docs/PROJECT_STATE.md` for exact commands and outputs):
 - The per-session usage cap is soft, not a global rate limit. A shared API key on a public deployment can still be exhausted.
 - UI visuals and mobile layout have not been checked in a real browser.
 - The Gemini free tier allowed about 20 requests per day for this model when tested (quota ran out during testing), and one analysis plus one draft uses 2 requests. A shared public demo would exhaust it quickly.
-- Not deployed.
+- Deployed on a free Render instance with shared API keys: it can sleep when idle and can hit provider rate limits. The OpenRouter fallback has been verified only on a single forced-failover run.
 
 ## Responsible AI and privacy
 - Output is a **prediction and a draft**, never a confirmed finding or an official submission. No government system is contacted.

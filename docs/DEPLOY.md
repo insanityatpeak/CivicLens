@@ -1,6 +1,6 @@
 # Deployment
 
-**Status: NOT DEPLOYED, and not tested on any host.** The app is a plain ASGI service (FastAPI + static files), so any host that runs
+**Status: DEPLOYED on Render (free tier) at https://civiclens-prns.onrender.com/ , verified 2026-11-05 with a real-provider run (Groq answered).** The app is a plain ASGI service (FastAPI + static files), so any host that runs
 Python 3.12 and a start command can run it. Verified only on a local Windows machine.
 
 ## Before you deploy
