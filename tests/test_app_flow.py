@@ -47,3 +47,23 @@ def test_unclear_scenario_asks_question_first():
     at = click(fresh("unclear"), "Analyze photo")
     assert any("water, oil" in t.label for t in at.text_input)
     assert not any(b.label == "Create complaint draft" for b in at.button)
+
+
+def test_fallback_sessions_are_not_capped():
+    at = fresh()
+    at.session_state["runs"] = 999
+    at.run()
+    assert not next(b for b in at.button if b.label == "Analyze photo").disabled
+
+
+def test_real_provider_sessions_are_capped(monkeypatch):
+    # dummy key: the Gemini client is constructed but never called, because the button is disabled
+    monkeypatch.setenv("GEMINI_API_KEY", "dummy-not-a-real-key")
+    monkeypatch.setenv("CIVICLENS_PROVIDER", "gemini")
+    at = AppTest.from_file(str(Path(__file__).resolve().parents[1] / "app.py"), default_timeout=30)
+    at.session_state["img"] = jpeg_bytes()
+    at.session_state["runs"] = 10
+    at.run()
+    assert not at.exception
+    assert next(b for b in at.button if b.label == "Analyze photo").disabled
+    assert "used its 10 photo analyses" in " ".join(w.value for w in at.warning)

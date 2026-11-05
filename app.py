@@ -22,14 +22,15 @@ st.set_page_config(page_title="CivicLens", page_icon="🔎", layout="centered")
 st.markdown(ui.CSS, unsafe_allow_html=True)
 
 DEFAULTS = {"stage": "upload", "img": None, "analysis": None, "answer": None, "complaint": None,
-            "error": None, "use_mock": False, "scenario": "pothole", "ctx": None, "lang": "en"}
+            "error": None, "use_mock": False, "scenario": "pothole", "ctx": None, "lang": "en", "runs": 0}
+MAX_RUNS_PER_SESSION = 10  # soft per-session cap to limit quota abuse on a shared key (not a global rate limit)
 for _k, _v in DEFAULTS.items():
     st.session_state.setdefault(_k, _v)
 S = st.session_state
 
 
 def start_over() -> None:
-    keep = {"use_mock": S.use_mock, "scenario": S.scenario}
+    keep = {"use_mock": S.use_mock, "scenario": S.scenario, "runs": S.runs}
     S.clear()
     S.update(DEFAULTS | keep)
 
@@ -79,8 +80,12 @@ if S.stage == "upload":
         S.img = up.getvalue()
     if S.img:
         st.image(S.img, width="stretch")
-        if st.button("Analyze photo", type="primary"):
+        limited = not provider.is_fallback and S.runs >= MAX_RUNS_PER_SESSION
+        if limited:
+            st.warning(f"This session has used its {MAX_RUNS_PER_SESSION} photo analyses. Please reload the page later to continue.")
+        if st.button("Analyze photo", type="primary", disabled=limited):
             S.error = None
+            S.runs += 1
             with st.status("Reading your photo...", expanded=True) as status:
                 try:
                     st.write("Checking the image")

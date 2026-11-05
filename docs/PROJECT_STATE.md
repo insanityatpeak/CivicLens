@@ -11,7 +11,8 @@ Submission status: unknown. Original deadline Nov 4 2026 8:00 PM IST has passed;
 | 1 | Done except real-model spike | partial | 23467a0 |
 | 2 | Code + unit tests done; real-model behaviour unverified | logic only | 0206a6d |
 | 3 | UI built; flow tested headless with labeled fallback; visuals unseen | flow only | ab443d0 |
-| 4 | Eval harness + hardening done; NO real metrics (no key, no images) | harness/tests only | pending |
+| 4 | Eval harness + hardening done; NO real metrics (no key, no images) | harness/tests only | 1486e93 |
+| 5 | README, DEPLOY.md, checklist, session cap done; NOT DEPLOYED; no screenshots | docs + tests | pending |
 
 ## Files
 - src/civiclens/config.py env loading; providers/{base,gemini,mock}.py provider abstraction
@@ -51,6 +52,7 @@ streamlit run app.py
 - Code review greps for key printing, TODO/FIXME, debugger calls -> none (VERIFIED)
 - `python eval/run_eval.py` with empty dataset -> exits 3 with "nothing was evaluated" (VERIFIED in test). Real evaluation: NOT RUN. No model metrics exist. Hindi rubric and unsupported-claim spot-check: PENDING (rating_sheet.csv generated per run, to be filled by user).
 - Phase 4 step 4 (targeted fix after eval): NOT DONE, blocked on a real eval run.
+- Phase 5: `pytest -q` -> `52 passed in 7.43s` (VERIFIED; adds tests that a real-provider session is capped at 10 analyses via dummy key, and that fallback sessions are not capped). ruff clean.
 - Auto-blurring of faces/plates: NOT IMPLEMENTED (future work); privacy_flags reporting implemented, UI warning is Phase 3.
 
 ## Known issues / limitations
