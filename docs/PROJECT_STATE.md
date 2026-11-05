@@ -70,3 +70,13 @@ uvicorn civiclens.web.server:app --app-dir src --port 8000
 ## Open questions
 - Is submission still open?
 - Add GEMINI_API_KEY and sample images.
+
+## Phase 7 verification log (2026-11-05)
+- UI rebuilt on FastAPI + static SPA (docs/UI_DESIGN.md). Providers: Groq primary, OpenRouter fallback, Gemini optional (FallbackChain).
+- Model ids found 404 on first live call; replaced after querying each provider's live catalogue: Groq `qwen/qwen3.8-27b`, OpenRouter `nvidia/nemotron-3.5-super-vl:free` (Gemma free models were rate-limited upstream at test time). Models rotate: re-check on 404.
+- REAL vision call VERIFIED through the app: pothole and garbage samples analysed by Groq in ~1.6-3.9 s; valid JSON, sensible ledger.
+- REAL complaint generation VERIFIED in English and Hindi via the API and in a headless-Chromium run of the full UI flow (example -> verify -> draft -> Hindi -> edit -> translate confirm). Single runs, not an evaluation: no accuracy numbers.
+- Fallback VERIFIED: with an invalid Groq model id the request was answered by OpenRouter (garbage sample, English draft passed the validator).
+- Defect found by real use and fixed: a Hindi draft kept English evidence bullets and the validator passed it. Validator now requires Hindi in evidence, claims, impact and request (user-typed text exempt); the retry then produced all-Hindi bullets. Tests: 72 passed, ruff clean.
+- Not verified: OpenRouter's complaint-writing quality and Hindi (only its vision stage and an English draft ran); Hindi UI strings unreviewed by a native speaker; screen readers and non-Chromium browsers; any deployment.
+- Observation: a model said "three stone blocks" for a photo showing two (Gemini, earlier); photo-reading accuracy is unmeasured.

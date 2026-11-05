@@ -37,11 +37,11 @@ flowchart LR
   G --> D[Editable draft + source table<br/>+ warnings]
 ```
 - **Two stages** separate *seeing* from *writing*: the writer never sees pixels, only ledger entries, so claims can be checked against ids.
-- **Provider abstraction** (`ModelProvider`): Gemini is the primary provider; swapping models does not touch app logic.
+- **Provider abstraction** (`ModelProvider`): Groq is the primary provider and OpenRouter the automatic fallback (a `FallbackChain` moves on only when a call fails: quota, network, refusal); swapping models does not touch app logic.
 - **Demonstration fallback:** a clearly labeled, canned offline mode so the flow can be walked without a key. It is **not AI**, never looks at the photo, and only activates when you choose it.
 
 ## Technology stack
-Python 3.12 · FastAPI + Uvicorn (backend) · vanilla HTML/CSS/JS single-page frontend (no build step) · Google Gemini via `google-genai` (primary provider, default model `gemini-2.5-flash`, configurable) · Pydantic · Pillow · pytest · ruff.
+Python 3.12 · FastAPI + Uvicorn (backend) · vanilla HTML/CSS/JS single-page frontend (no build step) · Groq (primary) with OpenRouter (fallback) over OpenAI-compatible HTTPS via `httpx`; Google Gemini optional via `google-genai`; models configurable in `.env` · Pydantic · Pillow · pytest · ruff.
 
 ## Installation and setup
 ```
@@ -49,7 +49,7 @@ python -m venv .venv
 .venv\Scripts\activate          # macOS/Linux: source .venv/bin/activate
 pip install -r requirements.txt
 copy .env.example .env          # macOS/Linux: cp .env.example .env
-# edit .env and set GEMINI_API_KEY (free key: https://aistudio.google.com/apikey)
+# edit .env: set GROQ_API_KEY (https://console.groq.com/keys) and OPENROUTER_API_KEY (https://openrouter.ai/keys)
 ```
 Never commit `.env`. For development tools: `pip install -r requirements-dev.txt`.
 
@@ -62,7 +62,7 @@ No key yet? Click **Use demonstration fallback** in the app (it appears when no 
 ```
 python scripts/spike.py [image]                     # one real model call + Hindi check
 python scripts/run_pipeline.py photo.jpg --lang hi  # full pipeline in the terminal
-pytest                                              # 58 tests (logic, not model quality)
+pytest                                              # 71 tests (logic, not model quality)
 ```
 
 ## How to use

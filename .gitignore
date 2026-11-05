@@ -8,3 +8,11 @@ venv/
 uploads/
 .pytest_cache/
 .ruff_cache/
+
+# data/samples images are local test inputs; licenses unknown, never commit
+data/samples/*.png
+data/samples/*.jpg
+data/samples/*.jpeg
+data/samples/*.webp
+!data/samples/pothole.jpg
+!data/samples/garbage.jpg
