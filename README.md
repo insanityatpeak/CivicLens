@@ -3,6 +3,8 @@
 *See a Problem. Report a Solution.*
 
 
+**Code:** https://github.com/insanityatpeak/CivicLens · **Live demo:** not deployed yet
+
 
 > **Status: working prototype.** The full flow runs and is tested (52 passing tests). It has **not** yet been evaluated against a real model or a labeled photo set, and it is **not deployed**. See [Evaluation](#evaluation-results) and [Limitations](#limitations).
 

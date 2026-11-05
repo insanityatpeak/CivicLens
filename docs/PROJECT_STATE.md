@@ -15,6 +15,7 @@ Submission status: unknown. Original deadline Nov 4 2026 8:00 PM IST has passed;
 | 5 | README, DEPLOY.md, checklist, session cap done; NOT DEPLOYED; no screenshots | docs + tests + fresh clone | a4d1f5e |
 
 ## Files
+- GitHub: https://github.com/insanityatpeak/CivicLens (public, main)
 - src/civiclens/config.py env loading; providers/{base,gemini,mock}.py provider abstraction
 - scripts/spike.py AI spike; app.py Streamlit skeleton
 - src/civiclens/{schemas,analysis,complaint,safety,i18n,parsing}.py: Phase 2 pipeline; tests/ (33 tests); scripts/run_pipeline.py
