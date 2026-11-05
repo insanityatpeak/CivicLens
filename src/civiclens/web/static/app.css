@@ -20,6 +20,7 @@ p{margin:0}
 .skip{position:absolute;left:-999px;top:8px;background:var(--navy);color:#fff;padding:10px 14px;border-radius:8px;z-index:50}
 .skip:focus{left:12px}
 :focus-visible{outline:3px solid #1e6fd9;outline-offset:2px;border-radius:6px}
+[tabindex="-1"]:focus{outline:none}
 button,input,select,textarea{font:inherit;color:inherit}
 .sr{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
 [hidden]{display:none!important}
@@ -224,7 +225,7 @@ html[lang=hi] .paper,.paper[lang=hi]{line-height:1.95}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition:none!important}}
 @media print{
   body{background:#fff}
-  .top,.steps-wrap,#banners,.foot,.toast,.draftbar,.doc-tools,.confirm,.side,.noprint{display:none!important}
+  .top,.steps-wrap,#banners,.foot,.toast,.draftbar,.doc-tools,.doc-actions,.confirm,.side,.noprint{display:none!important}
   .grid-draft{display:block}
   .paper{box-shadow:none;border:0;padding:0}
   .paper .mark{display:block}

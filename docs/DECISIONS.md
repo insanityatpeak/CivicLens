@@ -1,5 +1,7 @@
 # CivicLens Decisions (Phase 1)
 
+> Historical record of Phase 1 (2026-11-05). The Streamlit stack chosen here was later replaced by FastAPI plus a static frontend, and Gemini by Groq with OpenRouter as fallback: see `docs/UI_DESIGN.md` and `docs/PROJECT_STATE.md`.
+
 Note: the user opted out of discovery questions, so these are the assistant's defaults, not user-agreed choices. Override any of them.
 
 ## A. Concept critique

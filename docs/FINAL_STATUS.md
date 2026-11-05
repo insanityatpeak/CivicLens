@@ -1,58 +1,62 @@
 # CivicLens Final Status
 
-Date: 2026-11-05. Repo: https://github.com/insanityatpeak/CivicLens (public). Committed state described below is the Streamlit app at `main`. **A separate session is replacing/updating the UI (`src/civiclens/web/`, `tests/test_web.py`, a staged deletion of `tests/test_app_flow.py`); that work is uncommitted and NOT covered by this report.**
+Date: 2026-11-05. Repo: https://github.com/insanityatpeak/CivicLens (public). Live: https://civiclens-prns.onrender.com/ (Render free tier).
+Stack: FastAPI backend + static single-page frontend; Groq (primary) with OpenRouter (fallback); Gemini optional; labeled demonstration fallback.
 
 ## Features
 **Implemented and verified** (run and seen)
-- Image validation, resize, EXIF strip (unit tests).
-- Stage-1 analysis with JSON parse/retry and uncertainty policy: unit tests (scripted provider) plus real Gemini runs on 3 real photos (garbage dumping, litter, crowded train) and the pothole photo (analysis only).
-- Stage-2 grounded draft EN/HI: real Gemini on a hand-written ledger (3 drafts, all validator-pass first try); real photos: 3 English drafts passed the validator.
-- Rule-based validator catching injected phone, date, department, unknown source, invented location, unhedged inference, submission claim (unit tests).
-- Faces privacy flag on a real photo (garbage-dumping photo).
-- Eval harness mechanics (generated images + fallback, stamped HARNESS TEST ONLY).
-- Fresh-clone install and tests; secret scan clean (tree and history).
+- Three-stage UI (Analyze, Verify, Draft) in headless Chromium at 1280px and 390px: layout, loading, error, empty, no-issue, privacy-warning and Edit/Preview/Copy views were viewed; no console errors, no horizontal overflow.
+- Interface controls clicked in a browser: Copy (clipboard contains the user's edits), `.txt` download (UTF-8 BOM, edits kept), `.md` download, Print (print stylesheet hides controls and buttons), English/Hindi switch with the "replace my edits?" confirmation, Hindi download.
+- Keyboard-only flow: tab order, a 3px focus ring on every interactive element, Enter and Space activation, flow completed to the Hindi draft.
+- Automated accessibility scan (axe-core 4.10) on the draft, error and no-issue views: no violations after fixes (landmark and heading-order findings were fixed).
+- Real vision calls through the app: pothole and garbage example photos (Groq, a few seconds); faces flagged on a user photo; a crowded-train photo was classified "Other civic issue" with a privacy note.
+- Real English and Hindi drafts through the app and on the live site (Groq); the validator passes them.
+- Provider fallback: with Groq forced to fail, OpenRouter answered and the draft passed (single run). Groq 429s during testing also fell through to OpenRouter.
+- Validator: injected phone, date, department, unknown source, invented location, unhedged inference, submission claim, inference listed as photo evidence, English words in Hindi text (unit tests, 78 total).
+- Friendly provider errors (quota text instead of raw API output) shown in the UI.
+- Session analysis cap (tests, with a real-style provider stub).
+- Deployed and loaded: https://civiclens-prns.onrender.com/ (garbage example to English draft to Hindi draft, desktop and mobile, no fallback banner).
 
 **Implemented but unverified**
-- Streamlit UI visuals, Hindi rendering in a browser, mobile layout (never viewed).
-- Hindi draft from a real photo (only from a hand-written ledger).
-- Clarifying question and no-issue decline on real photos (only in the labeled fallback and unit tests).
-- Pothole draft on the real model (one 503, then quota exhausted).
-- Per-session cap against a real key (tested with a dummy key only).
+- Camera capture on a real phone; Safari, Firefox and other browsers; any screen reader.
+- Hindi interface strings (written by the assistant, no native-speaker review) and Hindi draft quality (readable, judged by the assistant only).
+- OpenRouter fallback on the live site (verified locally only); OpenRouter first-attempt behaviour (every draft with reasoning off needed the retry; cause not diagnosed because its free daily quota ran out).
+- Clarifying question and no-issue decline with a real model (no suitable real photo produced them; verified with the labeled fallback and unit tests).
+- Dockerfile and `render.yaml` as a Blueprint (the live service was created by hand following the same commands).
+- Print output as a physical page or PDF (print stylesheet checked in emulated print media only).
 
 **Not implemented**
-- Real evaluation/metrics; Hindi quality ratings; unsupported-claim spot-check.
-- Face/plate blurring; official reporting-channel links; deployment; screenshots; LICENSE; bring-your-own-key; global rate limiting.
+- Real evaluation/metrics (no labeled photo set); face and plate blurring; official reporting-channel links; screenshots in the repo; LICENSE; bring-your-own-key; global rate limiting.
 
 ## AI models and keys
-Google Gemini `gemini-2.5-flash` via `google-genai`, key from `GEMINI_API_KEY` in `.env` (git-ignored, never committed). Temperature 0.2. Labeled canned `MockProvider` as a demonstration fallback. **Free tier observed limit: 20 requests/day for this model; exhausted on 2026-11-05 (resets in ~17.5 h).**
+- Primary: Groq `qwen/qwen3.8-27b`. Fallback: OpenRouter `nvidia/nemotron-3.5-super-vl:free` (reasoning off). Optional: Gemini `gemini-2.5-flash`. Keys come from environment variables (`GROQ_API_KEY`, `OPENROUTER_API_KEY`, `GEMINI_API_KEY`), never committed. Temperature 0.2.
+- Free-tier limits observed: Groq 1,000 output and 7,000 input tokens per minute for this model; OpenRouter free models 50 requests per day (1,000 with $10 credit); Gemini free about 20 requests per day (exhausted earlier). Models rotate: two default ids returned 404 and were replaced from live catalogues.
 
-## Files (committed)
+## Files
 ```
-app.py                       Streamlit UI (being superseded in another session)
-src/civiclens/               config, providers/{base,gemini,mock}, schemas, analysis,
-                             complaint, safety (validator), i18n, parsing, export,
-                             ui_theme, evalmetrics
-scripts/                     spike.py, run_pipeline.py
-eval/                        run_eval.py, dataset.csv (empty), REPORT.md (no eval run)
-tests/                       analysis, safety, complaint, mock/export, eval, app flow
-data/SOURCES.md              image sources (CC0 samples recorded by another session)
+src/civiclens/web/            FastAPI server + static frontend (index.html, app.css, app.js, i18n.js)
+src/civiclens/providers/      base, openai_compat (Groq/OpenRouter), chain (fallback), gemini, mock
+src/civiclens/                config, schemas, analysis, complaint, safety (validator), i18n, parsing, export, evalmetrics
+scripts/                      spike.py, run_pipeline.py
+eval/                         run_eval.py, dataset.csv (empty), REPORT.md (no eval run)
+tests/                        analysis, safety, complaint, mock/export, eval, providers, web
+data/                         SOURCES.md; samples/pothole.jpg and garbage.jpg (CC0, committed); three user photos stay local
+Dockerfile, render.yaml       deployment files
 ```
 
 ## Tests
-- Committed `main` (Phase 5 state): `52 passed` (recorded earlier). Ruff clean.
-- Current working tree today: `58 passed, 1 warning` and ruff clean, but that includes the other session's uncommitted `tests/test_web.py` and excludes its staged deletion, so treat 52 as the committed number.
-- All tests use scripted/canned providers: they test logic, not model quality.
+`78 passed` and ruff clean (2026-11-05). They use scripted, canned or mocked-HTTP providers: they test logic, not model quality. Browser checks were scripted with Playwright (not part of the repo test suite).
 
 ## Evaluation
-None. `eval/REPORT.md` says so. Smoke tests only (N=3 drafts from a synthetic ledger; 3 real photos; no labels).
+None. `eval/REPORT.md` says so. Real-model checks so far are single runs: Groq English and Hindi drafts on two photos (all validator-pass), OpenRouter Hindi N=8 (all pass after retry, median 7.6 s), no ground-truth labels, same author as the prompts.
 
 ## Run locally
-`pip install -r requirements.txt`, set `GEMINI_API_KEY` in `.env`, `streamlit run app.py` (committed UI). CLI: `python scripts/run_pipeline.py photo.jpg --lang hi`. The other session's new UI may change this command.
+`pip install -r requirements.txt`, copy `.env.example` to `.env` and set `GROQ_API_KEY` (and `OPENROUTER_API_KEY`), then `uvicorn civiclens.web.server:app --app-dir src --port 8000`. CLI: `python scripts/run_pipeline.py photo.jpg --lang hi`.
 
 ## Deployment
-NOT DEPLOYED. `docs/DEPLOY.md` has steps. Note the free-tier quota above makes a shared public key impractical.
+Deployed on Render free tier (instances sleep when idle; shared keys; see limits above). `docs/DEPLOY.md` has steps.
 
 ## Known limitations
-Vision stage unevaluated; crowded-train photo was drafted as an "other civic issue" about overcrowding (over-acceptance risk); validator is pattern-based; English/Hindi only; no blurring; quota.
+Vision stage unevaluated; the crowded-train photo was accepted as an "other civic issue" (over-acceptance risk); one observation on a face photo described a person's action although the prompt says not to describe individuals; validator is pattern-based; English and Hindi only; no blurring; provider quotas are the practical ceiling for a public demo; when both providers are throttled users see a "busy" message.
 
 ## Remaining user actions
