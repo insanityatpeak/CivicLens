@@ -1,12 +1,12 @@
 """Tests of the labeled demonstration fallback and export (pipeline logic, not model quality)."""
 import pytest
+from conftest import jpeg_bytes
 
 from civiclens.analysis import analyze_image
 from civiclens.complaint import generate_complaint
 from civiclens.export import draft_to_text, to_txt_bytes
 from civiclens.providers.mock import MockProvider
 from civiclens.schemas import UserContext
-from conftest import jpeg_bytes
 
 
 def run(scenario, lang="en", **ctx):
@@ -36,7 +36,6 @@ def test_mock_unclear_asks_question_and_drafts_after_answer():
 
 
 def test_mock_no_issue_is_declined():
-    a, _ = None, None
     a = analyze_image(MockProvider("no_issue"), jpeg_bytes()).analysis
     assert not a.is_civic_issue and a.category == "no_civic_issue"
 

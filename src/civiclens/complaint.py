@@ -70,7 +70,7 @@ def _generate_once(provider: ModelProvider, prompt: str, analysis: ImageAnalysis
         data = extract_json(res.text)
         data.update(issue_category=analysis.category, language=language, is_draft=True)
         return ComplaintDraft.model_validate(data), res
-    except (ValueError, ValidationError) as exc:
+    except (ValueError, ValidationError):
         return None, res
 
 

@@ -2,11 +2,11 @@
 import json
 
 import pytest
+from conftest import ScriptedProvider, analysis_json, good_draft
 
 from civiclens.complaint import ComplaintError, generate_complaint
 from civiclens.i18n import validate_language
 from civiclens.schemas import ImageAnalysis
-from conftest import ScriptedProvider, analysis_json, good_draft
 
 
 def test_clean_draft_passes_first_try(analysis, ctx):

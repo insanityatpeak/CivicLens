@@ -15,12 +15,12 @@ _DATES = [
     re.compile(r"\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b"),
     re.compile(r"\b\d{4}-\d{2}-\d{2}\b"),
     re.compile(
-        r"\b(?:\d{1,2}\s+)?(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s+\d{1,4}\b", re.I
+        r"\b(?:\d{1,2}\s+)?(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s+\d{1,4}\b", re.IGNORECASE
     ),
 ]
 _CONTACT = [re.compile(r"[\w.+-]+@[\w-]+\.[\w.]+"), re.compile(r"https?://\S+")]
 _AUTHORITY = [
-    re.compile(p, re.I)
+    re.compile(p, re.IGNORECASE)
     for p in (
         r"municipal\s+corporation",
         r"\bPWD\b",
@@ -35,7 +35,7 @@ _AUTHORITY = [
     )
 ]
 _SUBMITTED = [
-    re.compile(p, re.I)
+    re.compile(p, re.IGNORECASE)
     for p in (r"has been (?:submitted|filed|registered)", r"have (?:submitted|filed)", r"complaint (?:no|number|id)", r"जमा कर दी", r"दर्ज कर दी")
 ]
 _HEDGES = (

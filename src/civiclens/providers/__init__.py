@@ -16,4 +16,4 @@ def get_provider(settings: Settings | None = None) -> ModelProvider:
     raise ValueError(f"Unknown CIVICLENS_PROVIDER: {settings.provider!r}")
 
 
-__all__ = ["ModelProvider", "ProviderError", "ProviderResult", "GeminiProvider", "MockProvider", "get_provider"]
+__all__ = ["GeminiProvider", "MockProvider", "ModelProvider", "ProviderError", "ProviderResult", "get_provider"]

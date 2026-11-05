@@ -8,7 +8,7 @@ import pytest
 from PIL import Image
 
 from civiclens.providers.base import ModelProvider, ProviderResult
-from civiclens.schemas import ImageAnalysis, Observation, UserContext
+from civiclens.schemas import ImageAnalysis, UserContext
 
 
 class ScriptedProvider(ModelProvider):

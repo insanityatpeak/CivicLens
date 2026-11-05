@@ -7,8 +7,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from civiclens.config import ConfigError  # noqa: E402
-from civiclens.providers import ProviderError, get_provider  # noqa: E402
+from civiclens.config import ConfigError
+from civiclens.providers import ProviderError, get_provider
 
 
 def main() -> int:

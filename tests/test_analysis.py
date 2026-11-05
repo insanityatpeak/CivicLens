@@ -2,11 +2,11 @@
 import io
 
 import pytest
+from conftest import ScriptedProvider, analysis_json, jpeg_bytes
 from PIL import Image
 
 from civiclens.analysis import AnalysisError, analyze_image, prepare_image
 from civiclens.parsing import extract_json
-from conftest import ScriptedProvider, analysis_json, jpeg_bytes
 
 
 def test_extract_json_handles_fences_and_prose():

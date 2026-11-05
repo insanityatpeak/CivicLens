@@ -2,22 +2,21 @@
 from __future__ import annotations
 
 import sys
-from html import escape
 from pathlib import Path
 
 import streamlit as st
 
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
-from civiclens import ui_theme as ui  # noqa: E402
-from civiclens.analysis import AnalysisError, analyze_image  # noqa: E402
-from civiclens.complaint import ComplaintError, generate_complaint  # noqa: E402
-from civiclens.config import ConfigError  # noqa: E402
-from civiclens.export import draft_to_text, text_to_markdown, to_txt_bytes  # noqa: E402
-from civiclens.i18n import CATEGORY_LABELS, SUPPORTED  # noqa: E402
-from civiclens.providers import get_provider  # noqa: E402
-from civiclens.providers.mock import SCENARIOS, MockProvider  # noqa: E402
-from civiclens.schemas import UserContext  # noqa: E402
+from civiclens import ui_theme as ui
+from civiclens.analysis import AnalysisError, analyze_image
+from civiclens.complaint import ComplaintError, generate_complaint
+from civiclens.config import ConfigError
+from civiclens.export import draft_to_text, text_to_markdown, to_txt_bytes
+from civiclens.i18n import CATEGORY_LABELS, SUPPORTED
+from civiclens.providers import get_provider
+from civiclens.providers.mock import SCENARIOS, MockProvider
+from civiclens.schemas import UserContext
 
 st.set_page_config(page_title="CivicLens", page_icon="🔎", layout="centered")
 st.markdown(ui.CSS, unsafe_allow_html=True)

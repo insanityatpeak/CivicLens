@@ -1,10 +1,8 @@
 """Headless Streamlit AppTest of the UI flow using the labeled demonstration fallback (logic, not looks)."""
-import pytest
 from pathlib import Path
 
-from streamlit.testing.v1 import AppTest
-
 from conftest import jpeg_bytes
+from streamlit.testing.v1 import AppTest
 
 
 def fresh(scenario="pothole") -> AppTest:

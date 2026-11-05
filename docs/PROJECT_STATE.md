@@ -10,13 +10,15 @@ Submission status: unknown. Original deadline Nov 4 2026 8:00 PM IST has passed;
 |---|---|---|---|
 | 1 | Done except real-model spike | partial | 23467a0 |
 | 2 | Code + unit tests done; real-model behaviour unverified | logic only | 0206a6d |
-| 3 | UI built; flow tested headless with labeled fallback; visuals unseen | flow only | pending |
+| 3 | UI built; flow tested headless with labeled fallback; visuals unseen | flow only | ab443d0 |
+| 4 | Eval harness + hardening done; NO real metrics (no key, no images) | harness/tests only | pending |
 
 ## Files
 - src/civiclens/config.py env loading; providers/{base,gemini,mock}.py provider abstraction
 - scripts/spike.py AI spike; app.py Streamlit skeleton
 - src/civiclens/{schemas,analysis,complaint,safety,i18n,parsing}.py: Phase 2 pipeline; tests/ (33 tests); scripts/run_pipeline.py
 - app.py UI; src/civiclens/{ui_theme,export}.py; .streamlit/config.toml; providers/mock.py = labeled canned fallback with 3 scenarios
+- eval/run_eval.py, eval/dataset.csv (header only), eval/REPORT.md (states no eval run), src/civiclens/evalmetrics.py, tests/test_eval.py; requirements-dev.txt
 - docs/DECISIONS.md, docs/plans/phase-1-plan.md, data/SOURCES.md
 
 ## How to run
@@ -42,6 +44,13 @@ streamlit run app.py
 - Hindi export: UTF-8 with BOM round-trip tested (VERIFIED in unit test); rendering in a real browser/Notepad NOT VIEWED.
 - Visual look (fonts, colors, mobile layout, contrast in practice): UNVERIFIED, no browser screenshot taken. docs/screenshots/ intentionally empty.
 - Sample-image buttons: NOT IMPLEMENTED (no licensed images). Streamlit server was stopped at user request.
+- `.venv/Scripts/ruff check . --exclude .venv` -> `All checks passed!` after fixing 40 findings (unused imports, import order; one TRY004 kept as ValueError by design) (VERIFIED)
+- `.venv/Scripts/python -m pytest -q` -> `50 passed in 4.51s` (VERIFIED; includes harness tests on generated images + fallback: harness mechanics ONLY)
+- Fresh venv (scratchpad/freshvenv) `pip install -r requirements.txt -r requirements-dev.txt` then `pytest` -> `50 passed in 6.70s`; `pip check` -> `No broken requirements found.` (VERIFIED)
+- Secret scan (regexes for Google/OpenAI/Anthropic/GitHub/AWS keys, private keys, key=... literals) over working tree and `git log -p --all` -> no matches; no .env or .venv tracked (VERIFIED)
+- Code review greps for key printing, TODO/FIXME, debugger calls -> none (VERIFIED)
+- `python eval/run_eval.py` with empty dataset -> exits 3 with "nothing was evaluated" (VERIFIED in test). Real evaluation: NOT RUN. No model metrics exist. Hindi rubric and unsupported-claim spot-check: PENDING (rating_sheet.csv generated per run, to be filled by user).
+- Phase 4 step 4 (targeted fix after eval): NOT DONE, blocked on a real eval run.
 - Auto-blurring of faces/plates: NOT IMPLEMENTED (future work); privacy_flags reporting implemented, UI warning is Phase 3.
 
 ## Known issues / limitations

@@ -7,11 +7,11 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from civiclens.analysis import AnalysisError, analyze_image  # noqa: E402
-from civiclens.complaint import ComplaintError, generate_complaint  # noqa: E402
-from civiclens.config import ConfigError  # noqa: E402
-from civiclens.providers import get_provider  # noqa: E402
-from civiclens.schemas import UserContext  # noqa: E402
+from civiclens.analysis import AnalysisError, analyze_image
+from civiclens.complaint import ComplaintError, generate_complaint
+from civiclens.config import ConfigError
+from civiclens.providers import get_provider
+from civiclens.schemas import UserContext
 
 
 def main() -> int:

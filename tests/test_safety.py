@@ -1,9 +1,9 @@
 """Pipeline-logic tests for the grounding validator."""
-import pytest
+
+from conftest import good_draft
 
 from civiclens.safety import validate_draft
 from civiclens.schemas import ComplaintDraft, UserContext
-from conftest import good_draft
 
 
 def make(analysis, **over) -> ComplaintDraft:

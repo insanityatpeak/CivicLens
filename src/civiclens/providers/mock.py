@@ -46,7 +46,7 @@ def _analysis(scenario: str) -> dict:
 
 
 def _grab(prompt: str, label: str) -> str:
-    m = re.search(rf"^{re.escape(label)}\s*(.*)$", prompt, re.M)
+    m = re.search(rf"^{re.escape(label)}\s*(.*)$", prompt, re.MULTILINE)
     return m.group(1).strip() if m else ""
 
 
