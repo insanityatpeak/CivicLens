@@ -8,11 +8,13 @@ Submission status: unknown. Original deadline Nov 4 2026 8:00 PM IST has passed;
 ## Phase status
 | Phase | Status | Verified? | Commit |
 |---|---|---|---|
-| 1 | In progress (awaiting spike run) | see log | pending |
+| 1 | Done except real-model spike | partial | 23467a0 |
+| 2 | Code + unit tests done; real-model behaviour unverified | logic only | pending |
 
 ## Files
 - src/civiclens/config.py env loading; providers/{base,gemini,mock}.py provider abstraction
 - scripts/spike.py AI spike; app.py Streamlit skeleton
+- src/civiclens/{schemas,analysis,complaint,safety,i18n,parsing}.py: Phase 2 pipeline; tests/ (33 tests); scripts/run_pipeline.py
 - docs/DECISIONS.md, docs/plans/phase-1-plan.md, data/SOURCES.md
 
 ## How to run
@@ -29,7 +31,12 @@ streamlit run app.py
 - `python scripts/spike.py` (no key) -> clear CONFIG ERROR, exit 2 (VERIFIED)
 - `CIVICLENS_PROVIDER=mock python scripts/spike.py` -> labeled fallback banner, canned text, exit 0 (VERIFIED; harness only, not AI)
 - Real Gemini call: NOT VERIFIED (no key). Hindi quality check: NOT VERIFIED.
-- Streamlit skeleton: NOT RUN (UNVERIFIED).
+- Streamlit skeleton: served HTTP 200 on :8501 with mock provider; page not viewed in a browser (UI UNVERIFIED).
+- `.venv/Scripts/python -m pytest -q` -> `33 passed in 0.71s` (VERIFIED; scripted fake provider, tests pipeline logic NOT model quality)
+- Validator catches injected phone, date, department, unknown source, invented location, unhedged inference, submission claim (VERIFIED in unit tests)
+- `python scripts/run_pipeline.py img.jpg` no key -> CONFIG ERROR exit 2; with mock -> clean ANALYSIS ERROR malformed_output exit 1, no stack trace (VERIFIED)
+- Real-model analysis/complaint runs on sample images: NOT RUN (no key, no sample images). Prompts and EN-vs-HI direct generation quality UNVERIFIED.
+- Auto-blurring of faces/plates: NOT IMPLEMENTED (future work); privacy_flags reporting implemented, UI warning is Phase 3.
 
 ## Known issues / limitations
 - No API key in environment: real model call NOT VERIFIED.
