@@ -77,12 +77,24 @@ def test_hindi_language_mismatch_is_caught(analysis, ctx):
     assert "wrong_language" in codes(validate_draft(d, analysis, ctx, "hi"))
 
 
+def hindi(d):
+    """Translate every model-written part of the draft, keeping the ledger-linked claims aligned."""
+    hi = "सड़क पर एक बड़ा गड्ढा है।"
+    claims = [c.model_copy(update={"statement": hi}) if not c.source.startswith("user:") else c for c in d.claim_sources]
+    return d.model_copy(update={"language": "hi", "description": hi, "public_impact": hi, "requested_action": hi,
+                                "observed_evidence": [hi for _ in d.observed_evidence], "claim_sources": claims})
+
+
 def test_hindi_draft_passes_language_check(analysis, ctx):
-    d = make(analysis, description="बस स्टॉप के पास सड़क पर एक गड्ढा है।")
-    d = d.model_copy(update={"language": "hi"})
-    assert "wrong_language" not in codes(validate_draft(d, analysis, ctx, "hi"))
+    assert "wrong_language" not in codes(validate_draft(hindi(make(analysis)), analysis, ctx, "hi"))
 
 
-def test_empty_required_fields_caught(analysis, ctx):
-    d = make(analysis, description=" ", requested_action="")
-    assert "missing_field" in codes(validate_draft(d, analysis, ctx))
+def test_hindi_draft_with_english_evidence_bullets_is_caught(analysis, ctx):
+    d = hindi(make(analysis)).model_copy(update={"observed_evidence": ["A hole in the road surface"]})
+    report = validate_draft(d, analysis, ctx, "hi")
+    assert any(i.code == "wrong_language" and "observed_evidence" in i.where for i in report.issues)
+
+
+def test_user_typed_location_is_exempt_from_hindi_check(analysis, ctx):
+    d = hindi(make(analysis)).model_copy(update={"location": "Near Church Street junction"})
+    assert not any(i.code == "wrong_language" and "location" in i.where for i in validate_draft(d, analysis, ctx, "hi").issues)

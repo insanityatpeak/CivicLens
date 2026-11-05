@@ -133,6 +133,14 @@ def validate_draft(draft: ComplaintDraft, analysis: ImageAnalysis, ctx: UserCont
     # Language check
     if expected_language == "hi" and devanagari_ratio(draft.description) < 0.5:
         issues.append(Issue("wrong_language", "description is not mostly Devanagari", "description"))
+    if expected_language == "hi":
+        # Every model-written part must be Hindi. User-typed text (location, notes, answers) is exempt: it is quoted, not translated.
+        parts = [("public_impact", draft.public_impact), ("requested_action", draft.requested_action)]
+        parts += [(f"observed_evidence[{i}]", t) for i, t in enumerate(draft.observed_evidence)]
+        parts += [(f"claim[{i}]", c.statement) for i, c in enumerate(draft.claim_sources) if not c.source.startswith("user:")]
+        for where, text in parts:
+            if text.strip() and devanagari_ratio(text) < 0.5:
+                issues.append(Issue("wrong_language", "text is not written in Hindi (Devanagari)", where))
     if expected_language and draft.language != expected_language:
         issues.append(Issue("wrong_language", f"draft language is {draft.language!r}, expected {expected_language!r}"))
 

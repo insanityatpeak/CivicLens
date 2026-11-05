@@ -136,7 +136,9 @@ def main() -> int:
         records.append(rec)
         (out / f"{i:03d}.json").write_text(json.dumps(rec, ensure_ascii=False, indent=2), encoding="utf-8")
         print(f"[{i + 1}/{len(rows)}] {row['path']}: true={rec['true']} pred={rec['pred']} err={rec['error']}")
-    model = settings.gemini_model if provider.name == "gemini" else provider.name
+    models = {"groq": settings.groq_model, "openrouter": settings.openrouter_model, "gemini": settings.gemini_model}
+    # A fallback chain may answer from any of its providers; the configured order is recorded instead of guessing.
+    model = ", ".join(f"{n}={models.get(n, n)}" for n in settings.providers)
     meta = {"date": ts, "provider": provider.name, "model": model, "temperature": TEMPERATURE,
             "split": a.split, "is_fallback": provider.is_fallback, "harness_test_only": provider.is_fallback}
     metrics = summarize(records, langs)
