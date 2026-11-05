@@ -14,6 +14,11 @@ uvicorn civiclens.web.server:app --app-dir src --host 0.0.0.0 --port $PORT
 Environment variables (set as host secrets, never commit): `GROQ_API_KEY` (primary), `OPENROUTER_API_KEY` (fallback), optional `GROQ_MODEL`, `OPENROUTER_MODEL`, `CIVICLENS_PROVIDER` (default `groq,openrouter`). Model ids in `.env.example` are UNVERIFIED defaults: confirm each is vision-capable in the provider's catalogue.
 Python 3.12 recommended. The two CC0 example photos in `data/samples/` (`pothole.jpg`, `garbage.jpg`) are exempted from the ignore rule so they ship with the repo; the three user-supplied images stay local.
 
+## One-click files
+- `render.yaml`: Render Blueprint (New > Blueprint, pick the repo; Render asks for `GROQ_API_KEY` and `OPENROUTER_API_KEY`). Free instances sleep when idle, so the first request can take about a minute.
+- `Dockerfile`: for Hugging Face Spaces (Docker SDK, default port 7860), Fly.io, Railway. Set the two keys as secrets on the host.
+Both are UNTESTED: Docker was not available locally and nothing has been deployed.
+
 ## After deploying
 Open the URL, run an example photo, and confirm there is **no** red "DEMONSTRATION FALLBACK" banner. If the key is missing the app says so and offers the labeled fallback. Put the live URL in the README only after you have loaded it.
 

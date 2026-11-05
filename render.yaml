@@ -1,0 +1,22 @@
+# Render Blueprint. UNTESTED on Render: verify on first deploy. Secrets are never stored here; Render prompts for them.
+services:
+  - type: web
+    name: civiclens
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn civiclens.web.server:app --app-dir src --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/status
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: CIVICLENS_PROVIDER
+        value: groq,openrouter
+      - key: GROQ_MODEL
+        value: qwen/qwen3.8-27b
+      - key: OPENROUTER_MODEL
+        value: nvidia/nemotron-3.5-super-vl:free
+      - key: GROQ_API_KEY
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
