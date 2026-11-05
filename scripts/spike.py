@@ -5,6 +5,9 @@ import mimetypes
 import sys
 from pathlib import Path
 
+for _s in (sys.stdout, sys.stderr):
+    _s.reconfigure(encoding="utf-8", errors="replace")  # Hindi output on Windows consoles
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from civiclens.config import ConfigError

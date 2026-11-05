@@ -12,7 +12,7 @@ Submission status: unknown. Original deadline Nov 4 2026 8:00 PM IST has passed;
 | 2 | Code + unit tests done; real-model behaviour unverified | logic only | 0206a6d |
 | 3 | UI built; flow tested headless with labeled fallback; visuals unseen | flow only | ab443d0 |
 | 4 | Eval harness + hardening done; NO real metrics (no key, no images) | harness/tests only | 1486e93 |
-| 5 | README, DEPLOY.md, checklist, session cap done; NOT DEPLOYED; no screenshots | docs + tests | pending |
+| 5 | README, DEPLOY.md, checklist, session cap done; NOT DEPLOYED; no screenshots | docs + tests + fresh clone | a4d1f5e |
 
 ## Files
 - src/civiclens/config.py env loading; providers/{base,gemini,mock}.py provider abstraction
@@ -35,7 +35,8 @@ streamlit run app.py
 - `pip install -r requirements.txt` in fresh .venv -> imports of google.genai, streamlit, pydantic, PIL OK (VERIFIED)
 - `python scripts/spike.py` (no key) -> clear CONFIG ERROR, exit 2 (VERIFIED)
 - `CIVICLENS_PROVIDER=mock python scripts/spike.py` -> labeled fallback banner, canned text, exit 0 (VERIFIED; harness only, not AI)
-- Real Gemini call: NOT VERIFIED (no key). Hindi quality check: NOT VERIFIED.
+- Real Gemini TEXT call: VERIFIED 2026-11-05 after user added key: `python scripts/spike.py` -> model=gemini-2.5-flash, fallback=False, latency 11.4s then 7.6s, ~200-260 output tokens. Hindi reply was fluent and polite (reviewer: assistant, not a human rater). It added unrequested transliteration/translation, so free text from the model must not be used raw; JSON-only prompts are required (they are).
+- Real Gemini IMAGE (vision) call: NOT VERIFIED (no sample images yet).
 - Streamlit skeleton: served HTTP 200 on :8501 with mock provider; page not viewed in a browser (UI UNVERIFIED).
 - `.venv/Scripts/python -m pytest -q` -> `33 passed in 0.71s` (VERIFIED; scripted fake provider, tests pipeline logic NOT model quality)
 - Validator catches injected phone, date, department, unknown source, invented location, unhedged inference, submission claim (VERIFIED in unit tests)
@@ -52,11 +53,13 @@ streamlit run app.py
 - Code review greps for key printing, TODO/FIXME, debugger calls -> none (VERIFIED)
 - `python eval/run_eval.py` with empty dataset -> exits 3 with "nothing was evaluated" (VERIFIED in test). Real evaluation: NOT RUN. No model metrics exist. Hindi rubric and unsupported-claim spot-check: PENDING (rating_sheet.csv generated per run, to be filled by user).
 - Phase 4 step 4 (targeted fix after eval): NOT DONE, blocked on a real eval run.
+- Real-model stage-2 smoke test (SYNTHETIC hand-written pothole ledger, not model-read photos; N=3 runs, NOT an evaluation): EN with location, HI with location, EN without location -> all 3 `validator_passed=True`, `regenerated=False`, latency 7.8-8.9s, no invented location/date/department/phone; no-location draft set location null and listed it in missing_info (VERIFIED, observed output). Quirks seen: EN draft hedged a user-stated fact ("appears to be ongoing"); HI claim table entry for ongoing had statement "yes" (shows oddly in the UI source table; not yet fixed); HI draft kept the user's English location verbatim (expected).
+- Console fix: scripts printed Hindi -> UnicodeEncodeError on Windows cp1252; scripts/spike.py, run_pipeline.py, eval/run_eval.py now force UTF-8 stdout (VERIFIED by rerun).
 - Phase 5: `pytest -q` -> `52 passed in 7.43s` (VERIFIED; adds tests that a real-provider session is capped at 10 analyses via dummy key, and that fallback sessions are not capped). ruff clean.
 - Auto-blurring of faces/plates: NOT IMPLEMENTED (future work); privacy_flags reporting implemented, UI warning is Phase 3.
 
 ## Known issues / limitations
-- No API key in environment: real model call NOT VERIFIED.
+- Key now provided via .env (git-ignored, not tracked). Vision path and sample images still outstanding.
 - No sample images yet.
 
 ## Open questions

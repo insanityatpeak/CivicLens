@@ -14,6 +14,9 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+for _s in (sys.stdout, sys.stderr):
+    _s.reconfigure(encoding="utf-8", errors="replace")  # Hindi output on Windows consoles
+
 sys.path.insert(0, str(ROOT / "src"))
 
 from civiclens import evalmetrics as em

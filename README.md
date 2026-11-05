@@ -70,12 +70,12 @@ pytest                                              # 52 tests (logic, not model
 5. Find your local municipal body's official channel to send it. CivicLens does not know or verify contact details.
 
 ## Evaluation results
-**No real evaluation has been run.** No API key and no labeled photo set were available when this was written, so there are no accuracy, latency or Hindi-quality numbers to report. The harness exists and is tested: `python eval/run_eval.py --split test` (see [`eval/REPORT.md`](eval/REPORT.md) for the dataset checklist, method and threats to validity). Runs on the demonstration fallback are stamped *harness test only*.
+**No real evaluation has been run.** There is no labeled photo set yet, so there are no accuracy, latency or Hindi-quality numbers to report. A small smoke test (not an evaluation) did run the real Gemini model on the complaint-writing stage using a hand-written pothole ledger: 3 drafts (English with location, Hindi with location, English without location) all passed the validator on the first try and invented nothing. The photo-reading (vision) stage has not been run against a real model. The harness exists and is tested: `python eval/run_eval.py --split test` (see [`eval/REPORT.md`](eval/REPORT.md) for the dataset checklist, method and threats to validity). Runs on the demonstration fallback are stamped *harness test only*.
 
 What *is* verified (see `docs/PROJECT_STATE.md` for exact commands and outputs): 52 unit and UI-flow tests pass, including injected fabrications being caught by the validator; lint is clean; install works in a fresh virtual environment; a scan found no secrets in the tree or git history. These tests use a scripted or canned provider, so they say nothing about model quality.
 
 ## Limitations
-- Real-model behavior (prompt quality, category accuracy, Hindi fluency, whether generating Hindi directly beats translating) is **unmeasured**.
+- Real-model behavior is barely measured: category accuracy from real photos, the vision prompt, Hindi quality beyond 3 smoke-test drafts, and whether generating Hindi directly beats translating are all **unmeasured**.
 - The validator is pattern-based. It catches the listed fabrication types but cannot prove a draft is faithful.
 - Only English and Hindi. Only still photos. No location from the photo (EXIF is stripped on purpose).
 - Face and number-plate **blurring is not implemented**; the app only warns.
