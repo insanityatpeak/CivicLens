@@ -221,6 +221,12 @@ html[lang=hi] .paper,.paper[lang=hi]{line-height:1.95}
   .doc-tools .seg button{flex:1}
   .card{padding:16px}
   .drop{padding:28px 14px}
+  .brand{min-height:44px}
+  .field>.seg{display:flex;align-self:stretch;border-radius:var(--r-sm)}
+  .field>.seg button{flex:1 1 0;padding:8px 6px;border-radius:calc(var(--r-sm) - 2px)}
+  .wrap{padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right))}
+  .foot{padding-bottom:calc(32px + env(safe-area-inset-bottom))}
+  .toast{bottom:calc(24px + env(safe-area-inset-bottom))}
 }
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition:none!important}}
 @media print{
