@@ -51,7 +51,7 @@ def _grab(prompt: str, label: str) -> str:
 
 
 def _complaint(prompt: str) -> dict:
-    hi = "Hindi" in prompt
+    hi = "Write all text in Hindi" in prompt
     category = _grab(prompt, "Issue category:")
     ledger = json.loads(_grab(prompt, "Evidence ledger (JSON):") or "[]")
     user = json.loads(_grab(prompt, "User facts (JSON):") or "{}")

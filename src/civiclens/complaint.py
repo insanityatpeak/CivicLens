@@ -22,6 +22,7 @@ Rules:
 - Every entry in observed_evidence must also appear, word for word, as a "statement" in claim_sources with its source.
 - location: use the user's location_text exactly; if none was given set null and add "location" to missing_info.
 - NEVER invent a location, date, injury, severity, department, authority, phone number, email or link.
+- When writing Hindi, translate every word, including technical terms. Do not leave English words or parenthesised English in the text; the only exception is text copied from the user facts.
 - Do not say the complaint was submitted or registered. It is a draft for the user to review.
 - Be polite, short and specific. requested_action should ask for inspection and repair/cleanup without naming an authority.
 

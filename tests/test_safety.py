@@ -98,3 +98,18 @@ def test_hindi_draft_with_english_evidence_bullets_is_caught(analysis, ctx):
 def test_user_typed_location_is_exempt_from_hindi_check(analysis, ctx):
     d = hindi(make(analysis)).model_copy(update={"location": "Near Church Street junction"})
     assert not any(i.code == "wrong_language" and "location" in i.where for i in validate_draft(d, analysis, ctx, "hi").issues)
+
+
+def test_english_word_left_in_hindi_text_is_caught(analysis, ctx):
+    d = hindi(make(analysis))
+    d = d.model_copy(update={"description": "सड़क पर कंक्रीट की रोकथाम दीवार (retaining wall) के पास गड्ढा है।"})
+    report = validate_draft(d, analysis, ctx, "hi")
+    assert any(i.code == "english_in_hindi" and "retaining" in i.message and i.where == "description" for i in report.issues)
+
+
+def test_acronyms_and_user_typed_words_are_allowed_in_hindi(analysis):
+    ctx = UserContext(location_text="Gali no. 4, Jangammet", ongoing=True)
+    d = hindi(make(analysis, location="Gali no. 4, Jangammet"))
+    d = d.model_copy(update={"description": "गली no. 4, Jangammet में कचरा है। कृपया BBMP या SMS से सूचित करें।"})
+    codes_ = {i.code for i in validate_draft(d, analysis, ctx, "hi").issues}
+    assert "english_in_hindi" not in codes_

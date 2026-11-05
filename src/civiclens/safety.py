@@ -44,6 +44,20 @@ _HEDGES = (
 )
 
 
+_LATIN_WORD = re.compile(r"[A-Za-z]{2,}")
+
+
+def _stray_english(text: str, user_text: str) -> list[str]:
+    """Latin-script words in text that should be Hindi. Allowed: words the user typed, and 2-5 letter ALL-CAPS acronyms."""
+    out: list[str] = []
+    for w in _LATIN_WORD.findall(text):
+        if w.lower() in user_text or (w.isupper() and len(w) <= 5):
+            continue
+        if w not in out:
+            out.append(w)
+    return out
+
+
 @dataclass
 class Issue:
     code: str
@@ -135,12 +149,14 @@ def validate_draft(draft: ComplaintDraft, analysis: ImageAnalysis, ctx: UserCont
         issues.append(Issue("wrong_language", "description is not mostly Devanagari", "description"))
     if expected_language == "hi":
         # Every model-written part must be Hindi. User-typed text (location, notes, answers) is exempt: it is quoted, not translated.
-        parts = [("public_impact", draft.public_impact), ("requested_action", draft.requested_action)]
+        parts = [("description", draft.description), ("public_impact", draft.public_impact), ("requested_action", draft.requested_action)]
         parts += [(f"observed_evidence[{i}]", t) for i, t in enumerate(draft.observed_evidence)]
         parts += [(f"claim[{i}]", c.statement) for i, c in enumerate(draft.claim_sources) if not c.source.startswith("user:")]
         for where, text in parts:
             if text.strip() and devanagari_ratio(text) < 0.5:
                 issues.append(Issue("wrong_language", "text is not written in Hindi (Devanagari)", where))
+            for word in _stray_english(text, allowed_text):
+                issues.append(Issue("english_in_hindi", f"English word {word!r} left in Hindi text; translate it", where))
     if expected_language and draft.language != expected_language:
         issues.append(Issue("wrong_language", f"draft language is {draft.language!r}, expected {expected_language!r}"))
 
