@@ -27,6 +27,7 @@ class Settings:
     groq_api_key: str | None
     openrouter_model: str
     openrouter_api_key: str | None
+    openrouter_reasoning: bool = False  # reasoning models are 4-5x slower here; off unless OPENROUTER_REASONING=on
 
     @property
     def provider(self) -> str:  # primary provider name
@@ -49,4 +50,5 @@ def load_settings() -> Settings:
         groq_api_key=_key("GROQ_API_KEY"),
         openrouter_model=os.getenv("OPENROUTER_MODEL", DEFAULT_OPENROUTER_MODEL).strip(),
         openrouter_api_key=_key("OPENROUTER_API_KEY"),
+        openrouter_reasoning=os.getenv("OPENROUTER_REASONING", "off").strip().lower() in ("on", "true", "1"),
     )

@@ -16,7 +16,8 @@ def _build(name: str, s: Settings) -> ModelProvider | None:
         return OpenAICompatProvider("groq", GROQ_URL, s.groq_api_key, s.groq_model)
     if name == "openrouter" and s.openrouter_api_key:
         return OpenAICompatProvider("openrouter", OPENROUTER_URL, s.openrouter_api_key, s.openrouter_model,
-                                    extra_headers={"X-Title": "CivicLens"})
+                                    extra_headers={"X-Title": "CivicLens"},
+                                    extra_body=None if s.openrouter_reasoning else {"reasoning": {"enabled": False}})
     if name == "gemini" and s.gemini_api_key:
         # imported lazily: the SDK is only needed when Gemini is in the chain
         from .gemini import GeminiProvider

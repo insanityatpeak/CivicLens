@@ -22,6 +22,10 @@ Both are UNTESTED: Docker was not available locally and nothing has been deploye
 ## After deploying
 Open the URL, run an example photo, and confirm there is **no** red "DEMONSTRATION FALLBACK" banner. If the key is missing the app says so and offers the labeled fallback. Put the live URL in the README only after you have loaded it.
 
+## Free-tier limits you will hit
+- Groq (qwen/qwen3.8-27b): 1,000 output tokens per minute. A few simultaneous users will be throttled (HTTP 429) and fall through to OpenRouter.
+- OpenRouter free models: 50 requests per day in total (1,000 with $10 credit). When it is used up there is no fallback and users see a "busy" message.
+
 ## Mitigations in the app
 10 MB upload cap; soft cap of 10 real-model analyses per browser session (in-memory, resets on server restart, per-cookie so it is easy to evade: NOT a rate limit); visible fallback banner; provider errors shown in plain language, details only in server logs.
 Not built: global rate limiting, bring-your-own-key, persistent storage (nothing is stored by design).

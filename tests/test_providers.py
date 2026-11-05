@@ -112,3 +112,22 @@ def test_get_provider_errors_and_mock():
     with pytest.raises(ValueError, match="Unknown"):
         get_provider(settings(providers=("nope",)))
     assert isinstance(get_provider(settings(providers=("mock",))), MockProvider)
+
+
+def test_openrouter_reasoning_is_off_by_default_and_sent_in_the_body():
+    chain = get_provider(settings(openrouter_api_key="o"))
+    assert chain._extra_body == {"reasoning": {"enabled": False}}
+    assert get_provider(settings(openrouter_api_key="o", openrouter_reasoning=True))._extra_body == {}
+
+
+def test_extra_body_is_merged_into_the_request():
+    seen = {}
+
+    def handler(req):
+        seen.update(json.loads(req.content))
+        return ok("x")
+
+    p = OpenAICompatProvider("openrouter", "https://example.test/v1", "k", "m", extra_body={"reasoning": {"enabled": False}},
+                             client=httpx.Client(transport=httpx.MockTransport(handler)))
+    p.generate("hi")
+    assert seen["reasoning"] == {"enabled": False} and seen["model"] == "m"
