@@ -9,12 +9,14 @@ Submission status: unknown. Original deadline Nov 4 2026 8:00 PM IST has passed;
 | Phase | Status | Verified? | Commit |
 |---|---|---|---|
 | 1 | Done except real-model spike | partial | 23467a0 |
-| 2 | Code + unit tests done; real-model behaviour unverified | logic only | pending |
+| 2 | Code + unit tests done; real-model behaviour unverified | logic only | 0206a6d |
+| 3 | UI built; flow tested headless with labeled fallback; visuals unseen | flow only | pending |
 
 ## Files
 - src/civiclens/config.py env loading; providers/{base,gemini,mock}.py provider abstraction
 - scripts/spike.py AI spike; app.py Streamlit skeleton
 - src/civiclens/{schemas,analysis,complaint,safety,i18n,parsing}.py: Phase 2 pipeline; tests/ (33 tests); scripts/run_pipeline.py
+- app.py UI; src/civiclens/{ui_theme,export}.py; .streamlit/config.toml; providers/mock.py = labeled canned fallback with 3 scenarios
 - docs/DECISIONS.md, docs/plans/phase-1-plan.md, data/SOURCES.md
 
 ## How to run
@@ -36,6 +38,10 @@ streamlit run app.py
 - Validator catches injected phone, date, department, unknown source, invented location, unhedged inference, submission claim (VERIFIED in unit tests)
 - `python scripts/run_pipeline.py img.jpg` no key -> CONFIG ERROR exit 2; with mock -> clean ANALYSIS ERROR malformed_output exit 1, no stack trace (VERIFIED)
 - Real-model analysis/complaint runs on sample images: NOT RUN (no key, no sample images). Prompts and EN-vs-HI direct generation quality UNVERIFIED.
+- `.venv/Scripts/python -m pytest -q` -> `44 passed in 4.27s` (VERIFIED). Includes Streamlit AppTest flows: pothole EN+HI to draft, no-issue declined, unclear asks question first, fallback banner always shown. All use the demonstration fallback, so they test UI/pipeline logic, NOT real AI.
+- Hindi export: UTF-8 with BOM round-trip tested (VERIFIED in unit test); rendering in a real browser/Notepad NOT VIEWED.
+- Visual look (fonts, colors, mobile layout, contrast in practice): UNVERIFIED, no browser screenshot taken. docs/screenshots/ intentionally empty.
+- Sample-image buttons: NOT IMPLEMENTED (no licensed images). Streamlit server was stopped at user request.
 - Auto-blurring of faces/plates: NOT IMPLEMENTED (future work); privacy_flags reporting implemented, UI warning is Phase 3.
 
 ## Known issues / limitations
