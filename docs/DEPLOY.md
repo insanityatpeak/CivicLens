@@ -5,6 +5,7 @@ Python 3.12 and a start command can run it. Verified only on a local Windows mac
 
 ## Before you deploy
 1. Free tiers are rate-limited and a public app with shared keys can be exhausted (the Gemini free quota already ran out once during development, HTTP 429); that is why a second provider is chained as a fallback.
+2. Decide the repo is ready: add a license.
 
 ## Run command
 ```
