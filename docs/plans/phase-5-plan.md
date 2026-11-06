@@ -30,3 +30,4 @@ Implemented: 10 MB upload cap (existing), soft per-session cap of 10 real-model 
 No browser capture was done. Expected filenames: 01-upload, 02-evidence-ledger, 03-clarifying-question, 04-draft-en, 05-draft-hi, 06-no-issue. README shows none until they exist.
 
 ## Open items needing the user
+Team name/members, GitHub URL, live URL, license (not chosen: no LICENSE file created).

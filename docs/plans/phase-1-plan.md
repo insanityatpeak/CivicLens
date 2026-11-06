@@ -15,3 +15,4 @@ Decisions and rationale: see `docs/DECISIONS.md`.
 - Sample images must be sourced by the user (no network image licensing check done here).
 
 ## Acceptance
+Goals: DECISIONS.md, provider abstraction with fallback, spike run recorded, no secrets in git, PROJECT_STATE updated.

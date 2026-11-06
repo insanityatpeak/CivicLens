@@ -98,7 +98,7 @@ What *is* verified (see `docs/PROJECT_STATE.md` for exact commands and outputs):
 Verified links to official reporting channels; more Indian languages; face and plate blurring; optional geotagging from EXIF with explicit consent; bring-your-own-key and server-side rate limiting; a citizen-to-authority feedback loop.
 
 ## AI-assisted development disclosure
-This project was built with AI coding assistance (Claude Code) for planning, implementation and testing; the runtime models are listed under Technology stack. All behavior claimed in this README was checked by running the code, and gaps are listed under Limitations.
+AI coding assistance was used for planning, implementation and testing; the runtime models are listed under Technology stack. All behavior claimed in this README was checked by running the code, and gaps are listed under Limitations.
 
 ## License
 No license file has been added yet, so all rights are reserved by default.

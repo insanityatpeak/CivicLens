@@ -26,3 +26,4 @@ Inputs: provider abstraction (Phase 1). No API key in env, so real-model behavio
 - Validator heuristics (regex) are best effort, not proof of faithfulness.
 
 ## Acceptance
+Integration runs per sample image cannot happen (no key, no images): state this plainly.

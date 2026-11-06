@@ -61,3 +61,4 @@ Deployed on Render free tier (instances sleep when idle; shared keys; see limits
 Vision stage unevaluated; the crowded-train photo was accepted as an "other civic issue" (over-acceptance risk); one observation on a face photo described a person's action although the prompt says not to describe individuals; validator is pattern-based; English and Hindi only; no blurring; provider quotas are the practical ceiling for a public demo; when both providers are throttled users see a "busy" message.
 
 ## Remaining user actions
+LICENSE; screenshots; confirm rights for the three user-supplied photos before showing them publicly; consider $10 OpenRouter credit or Groq's dev tier before a live demo; native-speaker review of Hindi strings; label a photo set and run `eval/run_eval.py`.
