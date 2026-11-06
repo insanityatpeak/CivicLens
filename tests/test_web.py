@@ -110,7 +110,6 @@ def test_real_provider_sessions_are_capped(monkeypatch):
     monkeypatch.setattr(server, "MAX_RUNS_PER_SESSION", 2)
     server._runs.clear()
     c = TestClient(server.app)
-    c.get("/api/status")  # sets session cookie
     codes = [c.post("/api/analyze", files={"file": ("p.jpg", jpeg_bytes(), "image/jpeg")}).status_code for _ in range(3)]
     assert codes == [200, 200, 429]
 
@@ -119,3 +118,36 @@ def test_fallback_sessions_are_not_capped(client, monkeypatch):
     monkeypatch.setattr(server, "MAX_RUNS_PER_SESSION", 1)
     for _ in range(3):
         analyze(client)
+
+
+def test_cap_is_per_ip_not_global(monkeypatch):
+    monkeypatch.setattr(server, "_provider", lambda demo: _RealishProvider("pothole"))
+    monkeypatch.setattr(server, "MAX_RUNS_PER_SESSION", 1)
+    server._runs.clear()
+    c = TestClient(server.app)
+    post = lambda ip: c.post("/api/analyze", files={"file": ("p.jpg", jpeg_bytes(), "image/jpeg")},
+                             headers={"X-Forwarded-For": ip}).status_code
+    assert [post("1.1.1.1"), post("1.1.1.1"), post("2.2.2.2")] == [200, 429, 200]
+
+
+def test_window_expires(monkeypatch):
+    server._runs.clear()
+    server._runs["9.9.9.9"].append(0.0)  # ancient timestamp
+    assert server._runs_used("9.9.9.9") == 0
+
+
+def test_security_headers_request_id_and_healthz(client):
+    r = client.get("/healthz")
+    assert r.json() == {"ok": True}
+    assert r.headers["x-content-type-options"] == "nosniff"
+    assert "frame-ancestors 'none'" in r.headers["content-security-policy"]
+    assert len(r.headers["x-request-id"]) == 12
+
+
+def test_log_lines_carry_no_user_text():
+    import json
+    import logging
+    rec = logging.LogRecord("civiclens", logging.INFO, "", 0, "request", None, None)
+    rec.rid, rec.path, rec.notes = "abc", "/api/complaint", "my secret address"
+    line = json.loads(server._JsonFormatter().format(rec))
+    assert "notes" not in line and line["rid"] == "abc"

@@ -12,7 +12,7 @@ class GeminiProvider(ModelProvider):
     def __init__(self, api_key: str, model: str) -> None:
         from google import genai  # imported lazily so mock use needs no SDK
 
-        self._client = genai.Client(api_key=api_key)
+        self._client = genai.Client(api_key=api_key, http_options={"timeout": 60_000})  # ms
         self._model = model
 
     def generate(self, prompt: str, image_bytes: bytes | None = None, mime_type: str = "image/jpeg") -> ProviderResult:

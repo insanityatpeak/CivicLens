@@ -76,3 +76,24 @@ def test_prepare_downsizes_and_strips_exif():
     out = prepare_image(jpeg_bytes((4000, 3000)))
     img = Image.open(io.BytesIO(out))
     assert max(img.size) <= 1568 and not img.getexif()
+
+
+def test_pixel_bomb_is_rejected(monkeypatch):
+    import io
+
+    from PIL import Image
+
+    from civiclens import analysis
+    monkeypatch.setattr(analysis, "MAX_PIXELS", 100)
+    buf = io.BytesIO()
+    Image.new("RGB", (50, 50)).save(buf, format="PNG")
+    with pytest.raises(analysis.AnalysisError) as e:
+        analysis.prepare_image(buf.getvalue())
+    assert e.value.kind == "too_large"
+
+
+def test_format_is_sniffed_from_content_not_filename():
+    from civiclens import analysis
+    with pytest.raises(analysis.AnalysisError) as e:
+        analysis.prepare_image(b"GIF89a" + b"\0" * 64)
+    assert e.value.kind in ("unsupported_type", "invalid_image")

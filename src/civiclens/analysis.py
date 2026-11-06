@@ -13,6 +13,8 @@ from .schemas import ImageAnalysis
 
 MAX_BYTES = 10 * 1024 * 1024
 MAX_SIDE = 1568
+MAX_PIXELS = 40_000_000  # decompression-bomb guard: refuse to decode anything larger
+Image.MAX_IMAGE_PIXELS = MAX_PIXELS
 ALLOWED_FORMATS = {"JPEG", "PNG", "WEBP"}
 
 DEFAULT_QUESTION = "Could you tell us what problem you want to report in this photo, and where it is?"
@@ -64,10 +66,14 @@ def prepare_image(data: bytes) -> bytes:
         fmt = opened.format
         if fmt not in ALLOWED_FORMATS:
             raise AnalysisError("unsupported_type", "Please upload a JPEG, PNG or WEBP photo.")
+        if opened.width * opened.height > MAX_PIXELS:
+            raise AnalysisError("too_large", "That photo has too many pixels. Please use a smaller photo.")
         img = ImageOps.exif_transpose(opened)
         img = img.convert("RGB")
     except AnalysisError:
         raise
+    except Image.DecompressionBombError as exc:
+        raise AnalysisError("too_large", "That photo has too many pixels. Please use a smaller photo.") from exc
     except Exception as exc:
         raise AnalysisError("invalid_image", "That file could not be read as an image.") from exc
     img.thumbnail((MAX_SIDE, MAX_SIDE))

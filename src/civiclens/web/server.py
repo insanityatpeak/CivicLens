@@ -6,13 +6,14 @@ The server is stateless apart from a per-session analysis counter (soft quota gu
 from __future__ import annotations
 
 import logging
-import secrets
 import threading
-from collections import Counter
+import time
+import uuid
+from collections import defaultdict, deque
 from pathlib import Path
 from typing import Annotated, get_args
 
-from fastapi import FastAPI, File, Form, HTTPException, Request, Response, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
@@ -30,7 +31,18 @@ from ..schemas import Category, ImageAnalysis, Language, UserContext
 ROOT = Path(__file__).resolve().parents[3]
 STATIC = Path(__file__).parent / "static"
 SAMPLES_DIR = ROOT / "data" / "samples"
-MAX_RUNS_PER_SESSION = 10  # soft cap on real-model analyses per browser session (not a global rate limit)
+MAX_RUNS_PER_SESSION = 10  # real-model analyses allowed per client IP within RUN_WINDOW_S
+RUN_WINDOW_S = 3600
+SECURITY_HEADERS = {
+    "X-Content-Type-Options": "nosniff",
+    "Referrer-Policy": "no-referrer",
+    "X-Frame-Options": "DENY",
+    "Permissions-Policy": "camera=(self), microphone=(), geolocation=(self)",
+    "Content-Security-Policy": (
+        "default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+        "font-src https://fonts.gstatic.com; script-src 'self'; connect-src 'self'; "
+        "frame-ancestors 'none'; base-uri 'self'; form-action 'self'"),
+}
 
 # Example photos offered on the empty state. Only files that exist and have a recorded license are listed.
 SAMPLES: dict[str, dict[str, str | None]] = {
@@ -39,9 +51,28 @@ SAMPLES: dict[str, dict[str, str | None]] = {
 }
 
 log = logging.getLogger("civiclens")
+
+
+class _JsonFormatter(logging.Formatter):
+    """One JSON object per line. Only whitelisted structured fields are emitted, never request bodies."""
+    FIELDS = ("rid", "method", "path", "status", "ms", "model", "latency_s", "category")
+
+    def format(self, record: logging.LogRecord) -> str:
+        import json
+        out = {"level": record.levelname, "msg": record.getMessage()}
+        out.update({k: getattr(record, k) for k in self.FIELDS if getattr(record, k, None) is not None})
+        return json.dumps(out)
+
+
+if not log.handlers:
+    _h = logging.StreamHandler()
+    _h.setFormatter(_JsonFormatter())
+    log.addHandler(_h)
+    log.setLevel(logging.INFO)
+    log.propagate = False
 app = FastAPI(title="CivicLens", docs_url=None, redoc_url=None)
 
-_runs: Counter[str] = Counter()
+_runs: defaultdict[str, deque[float]] = defaultdict(deque)  # client IP -> timestamps of recent real-model runs
 _runs_lock = threading.Lock()
 
 
@@ -55,10 +86,6 @@ def _provider(demo: str | None) -> ModelProvider:
         return get_provider()
     except (ConfigError, ValueError) as exc:
         raise HTTPException(503, detail={"kind": "config", "message": str(exc)}) from exc
-
-
-def _sid(request: Request) -> str:
-    return request.cookies.get("cl_sid") or ""
 
 
 def friendly(kind: str, message: str) -> tuple[str, str]:
@@ -76,6 +103,48 @@ def _err(status: int, kind: str, message: str) -> JSONResponse:
     return JSONResponse({"error": {"kind": kind, "message": message}}, status_code=status)
 
 
+def _client_ip(request: Request) -> str:
+    """Rightmost X-Forwarded-For entry is the one appended by our own proxy (Render); fall back to the socket peer."""
+    fwd = request.headers.get("x-forwarded-for", "")
+    if fwd:
+        return fwd.split(",")[-1].strip() or "anon"
+    return request.client.host if request.client else "anon"
+
+
+def _runs_used(ip: str) -> int:
+    q = _runs.get(ip)
+    if not q:
+        return 0
+    cutoff = time.monotonic() - RUN_WINDOW_S
+    while q and q[0] < cutoff:
+        q.popleft()
+    return len(q)
+
+
+@app.middleware("http")
+async def _observe(request: Request, call_next):
+    """Request id, security headers and one structured log line per request (never photos or user text)."""
+    rid = uuid.uuid4().hex[:12]
+    request.state.rid = rid
+    start = time.perf_counter()
+    status_code = 500
+    try:
+        response = await call_next(request)
+        status_code = response.status_code
+    finally:
+        log.info("request", extra={"rid": rid, "method": request.method, "path": request.url.path,
+                                   "status": status_code, "ms": round((time.perf_counter() - start) * 1000)})
+    response.headers["X-Request-ID"] = rid
+    for k, v in SECURITY_HEADERS.items():
+        response.headers.setdefault(k, v)
+    return response
+
+
+@app.get("/healthz", include_in_schema=False)
+def healthz() -> dict:
+    return {"ok": True}
+
+
 @app.exception_handler(HTTPException)
 async def _http_exc(_: Request, exc: HTTPException) -> JSONResponse:
     d = exc.detail
@@ -86,20 +155,18 @@ async def _http_exc(_: Request, exc: HTTPException) -> JSONResponse:
 
 # ---------- API ----------
 @app.get("/api/status")
-def status(request: Request, response: Response) -> dict:
-    if not request.cookies.get("cl_sid"):
-        response.set_cookie("cl_sid", secrets.token_urlsafe(16), httponly=True, samesite="lax")
+def status(request: Request) -> dict:
     configured, message = True, None
     try:
         get_provider()
     except (ConfigError, ValueError) as exc:
         configured, message = False, str(exc)
-    sid = _sid(request)
+    ip = _client_ip(request)
     return {
         "configured": configured,
         "config_message": message,
         "max_runs": MAX_RUNS_PER_SESSION,
-        "runs_used": _runs.get(sid, 0) if sid else 0,
+        "runs_used": _runs_used(ip),
         "demo_scenarios": list(SCENARIOS),
         "languages": SUPPORTED,
         "category_labels": CATEGORY_LABELS,
@@ -126,22 +193,24 @@ def analyze(request: Request, file: Annotated[UploadFile | None, File()] = None,
     else:
         raise HTTPException(400, "No photo was provided.")
 
-    sid = _sid(request) or "anon"
+    ip = _client_ip(request)
     if not provider.is_fallback:
         with _runs_lock:
-            if _runs[sid] >= MAX_RUNS_PER_SESSION:
+            if _runs_used(ip) >= MAX_RUNS_PER_SESSION:
                 raise HTTPException(429, detail={
                     "kind": "limit",
-                    "message": f"This session has used its {MAX_RUNS_PER_SESSION} photo analyses. Please try again later."})
-            _runs[sid] += 1
+                    "message": f"You have used your {MAX_RUNS_PER_SESSION} photo analyses for this hour. Please try again later."})
+            _runs[ip].append(time.monotonic())
     try:
         res = analyze_image(provider, data)
     except AnalysisError as exc:
         status_code = 502 if exc.kind in ("provider", "malformed_output") else 422
         k, m = friendly(exc.kind, exc.message)
         raise HTTPException(status_code, detail={"kind": k, "message": m}) from exc
+    log.info("analysis", extra={"rid": getattr(request.state, "rid", None), "model": res.model,
+                                "latency_s": round(res.latency_s, 2), "category": res.analysis.category})
     return {"analysis": res.analysis.model_dump(), "model": res.model, "latency_s": round(res.latency_s, 2),
-            "is_fallback": res.is_fallback, "runs_used": _runs.get(sid, 0)}
+            "is_fallback": res.is_fallback, "runs_used": _runs_used(ip)}
 
 
 class ComplaintRequest(BaseModel):

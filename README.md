@@ -83,7 +83,7 @@ What *is* verified (see `docs/PROJECT_STATE.md` for exact commands and outputs):
 - The validator is pattern-based. It catches the listed fabrication types but cannot prove a draft is faithful.
 - Only English and Hindi. Only still photos. No location from the photo (EXIF is stripped on purpose).
 - Face and number-plate **blurring is not implemented**; the app only warns.
-- The per-session usage cap is soft, not a global rate limit. A shared API key on a public deployment can still be exhausted.
+- Real-model analyses are capped at 10 per client IP per hour. This protects against one user draining the quota, but a shared API key on a public deployment can still be exhausted by many users.
 - The UI was checked in headless Chromium (desktop and mobile widths, keyboard-only flow, automated accessibility scan). Not checked: Safari, Firefox, a real phone camera, any screen reader.
 - Free-tier limits are the practical ceiling: Groq about 1,000 output tokens per minute for the default model, OpenRouter free models 50 requests per day (both observed while testing). A shared public demo would exhaust them quickly.
 - Deployed on a free Render instance with shared API keys: it can sleep when idle and can hit provider rate limits. The OpenRouter fallback has been verified only on a single forced-failover run.
