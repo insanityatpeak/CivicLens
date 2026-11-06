@@ -12,14 +12,14 @@ Stack: FastAPI backend + static single-page frontend; Groq (primary), OpenRouter
 - Real vision calls through the app: pothole and garbage example photos (Groq, a few seconds); faces flagged on a user photo; a crowded-train photo was classified "Other civic issue" with a privacy note.
 - Real English and Hindi drafts through the app and on the live site (Groq); the validator passes them.
 - Provider fallback: with Groq forced to fail, OpenRouter answered and the draft passed (single run). Groq 429s during testing also fell through to OpenRouter.
-- Validator: injected phone, date, department, unknown source, invented location, unhedged inference, submission claim, inference listed as photo evidence, English words in Hindi text (unit tests, 78 total).
+- Validator: injected phone, date, department, unknown source, invented location, unhedged inference, submission claim, inference listed as photo evidence, English words in Hindi text (unit tests, 79 total).
 - Friendly provider errors (quota text instead of raw API output) shown in the UI.
 - Session analysis cap (tests, with a real-style provider stub).
 - Deployed and loaded: https://civiclens-prns.onrender.com/ (garbage example to English draft to Hindi draft, desktop and mobile, no fallback banner).
 
 **Implemented but unverified**
 - Camera capture on a real phone; Safari, Firefox and other browsers; any screen reader.
-- Hindi interface strings (written by the assistant, no native-speaker review) and Hindi draft quality (readable, judged by the assistant only).
+- Hindi interface strings (written by the assistant, no native-speaker review) and Hindi draft quality (readable, judged by the AI assistant only).
 - OpenRouter fallback on the live site (verified locally only); OpenRouter first-attempt behaviour (every draft with reasoning off needed the retry; cause not diagnosed because its free daily quota ran out).
 - Clarifying question and no-issue decline with a real model (no suitable real photo produced them; verified with the labeled fallback and unit tests).
 - Dockerfile and `render.yaml` as a Blueprint (the live service was created by hand following the same commands).
@@ -40,6 +40,7 @@ src/civiclens/                config, schemas, analysis, complaint, safety (vali
 scripts/                      spike.py, run_pipeline.py
 eval/                         run_eval.py, dataset.csv (empty), REPORT.md (no eval run)
 tests/                        analysis, safety, complaint, mock/export, eval, providers, web
+docs/                         ARCHITECTURE, DECISIONS, UI_DESIGN, PROJECT_STATE, DEPLOY, FINAL_STATUS
 data/                         SOURCES.md; samples/pothole.jpg and garbage.jpg (CC0, committed); three user photos stay local
 Dockerfile, render.yaml       deployment files
 ```

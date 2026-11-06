@@ -2,11 +2,11 @@
 
 *See a Problem. Report a Solution.*
 
-
 **Code:** https://github.com/insanityatpeak/CivicLens · **Live demo:** https://civiclens-prns.onrender.com/ (free tier: the first load after idle can take about a minute)
 
+Built by Priyanshu ([@insanityatpeak](https://github.com/insanityatpeak)): a photo-to-complaint assistant that shows where every claim in the draft comes from.
 
-> **Status: working prototype.** The full flow runs and is tested (72 passing tests) and is deployed on Render. It has **not** yet been evaluated on a labeled photo set: real-model runs so far are single smoke tests, not measurements. See [Evaluation](#evaluation-results) and [Limitations](#limitations).
+> **Status: working, deployed, not yet evaluated.** The full flow runs end to end with real models and is deployed on Render (free tier). 79 automated tests cover the logic, not model quality. There is no labeled photo set yet, so accuracy and Hindi quality are unmeasured; real-model runs so far are single smoke tests. See [Evaluation](#evaluation-results) and [Limitations](#limitations).
 
 ## The problem
 Reporting a pothole, a garbage pile or stagnant water is a hassle: you must pick the right category, find the right department, write a convincing complaint, often in a language that is not your own, and include details (where? how long?) that you may not think about. So most issues go unreported.
@@ -20,6 +20,7 @@ A citizen uploads a photo. CivicLens lists what the AI can **see** and what it o
 - **Code checks the AI.** A rule-based validator flags invented phone numbers, dates, departments, links and locations, claims that the complaint was "submitted", and inferences stated as fact. On failure the draft is regenerated once; remaining warnings are shown to the user.
 - **Privacy-aware.** Photos are re-encoded (dropping EXIF/GPS), not stored by the app, and a warning appears if faces or number plates are reported.
 
+*Screenshots: not yet captured. Architecture notes: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).*
 
 ## AI/ML architecture
 ```mermaid
@@ -97,9 +98,10 @@ What *is* verified (see `docs/PROJECT_STATE.md` for exact commands and outputs):
 Verified links to official reporting channels; more Indian languages; face and plate blurring; optional geotagging from EXIF with explicit consent; bring-your-own-key and server-side rate limiting; a citizen-to-authority feedback loop.
 
 ## AI-assisted development disclosure
+This project was built with AI coding assistance (Claude Code) for planning, implementation and testing; the runtime models are listed under Technology stack. All behavior claimed in this README was checked by running the code, and gaps are listed under Limitations.
 
 ## License
-[License: to be chosen by the team. MIT is a common default.]
+No license file has been added yet, so all rights are reserved by default.
 
 ## Acknowledgments
 Sample image sources and licenses: see `data/SOURCES.md` (no images added yet).

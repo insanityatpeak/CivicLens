@@ -27,5 +27,6 @@ Choose **Streamlit Community Cloud**: no extra files, matches the framework. Nee
 Implemented: 10 MB upload cap (existing), soft per-session cap of 10 real-model analyses (app.py), explicit labeled fallback banner. Documented, not built: bring-your-own-key field, global rate limiting, spending cap on the key (user should set a quota in Google AI Studio).
 
 ## 5. Screenshots plan
+No browser capture was done. Expected filenames: 01-upload, 02-evidence-ledger, 03-clarifying-question, 04-draft-en, 05-draft-hi, 06-no-issue. README shows none until they exist.
 
 ## Open items needing the user

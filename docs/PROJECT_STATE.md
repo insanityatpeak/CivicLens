@@ -1,6 +1,5 @@
 # CivicLens Project State
 Last updated: 2026-11-05
-Submission status: unknown. Original deadline Nov 4 2026 8:00 PM IST has passed; user not yet asked whether extended.
 
 ## Decisions
 - FastAPI + static SPA frontend (replaced Streamlit, user choice, see docs/UI_DESIGN.md) + Gemini primary + labeled mock fallback; evidence-ledger concept (phase 1, assistant defaults; user opted out of questions). See docs/DECISIONS.md.
@@ -57,6 +56,7 @@ uvicorn civiclens.web.server:app --app-dir src --port 8000
 - Real-model stage-2 smoke test (SYNTHETIC hand-written pothole ledger, not model-read photos; N=3 runs, NOT an evaluation): EN with location, HI with location, EN without location -> all 3 `validator_passed=True`, `regenerated=False`, latency 7.8-8.9s, no invented location/date/department/phone; no-location draft set location null and listed it in missing_info (VERIFIED, observed output). Quirks seen: EN draft hedged a user-stated fact ("appears to be ongoing"); HI claim table entry for ongoing had statement "yes" (shows oddly in the UI source table; not yet fixed); HI draft kept the user's English location verbatim (expected).
 - Console fix: scripts printed Hindi -> UnicodeEncodeError on Windows cp1252; scripts/spike.py, run_pipeline.py, eval/run_eval.py now force UTF-8 stdout (VERIFIED by rerun).
 - Phase 5: `pytest -q` -> `52 passed in 7.43s` (VERIFIED; adds tests that a real-provider session is capped at 10 analyses via dummy key, and that fallback sessions are not capped). ruff clean.
+- Deployment: NOT DEPLOYED (config + docs/DEPLOY.md prepared). Screenshots: NOT CAPTURED; README states so. LICENSE: not created (user to choose). Placeholders since filled in README.
 - Phase 6 (2026-11-05): real runs on 4 photos earlier today: garbage dumping (faces flagged, EN draft passed validator), litter by wall (EN draft passed), crowded train (classified other_civic_issue; EN draft about overcrowding passed validator; over-acceptance concern), pothole.jpg (analysis OK; draft hit 503). Then `429 RESOURCE_EXHAUSTED`: Gemini free tier limit 20 requests/day for gemini-2.5-flash exhausted; ~17.5h to reset. Rehearsal of Hindi-from-photo and pothole draft therefore NOT DONE.
 - After user supplied a new GEMINI_API_KEY: still `429 RESOURCE_EXHAUSTED` on gemini-2.5-flash (free-tier quota is per Google project per model, so a key from the same project shares it). `gemini-2.5-flash-lite` -> 404 "no longer available to new users, use gemini-3.5-flash-lite"; `gemini-3.5-flash-lite` -> 503 high demand (one attempt). Pothole draft and Hindi-from-photo rehearsal remain NOT DONE. Options: key from a NEW Google project, paid tier, wait ~17h, or retry gemini-3.5-flash-lite later (model default in .env.example is unchanged and untested on 3.5).
 - Demo script timing by word count: 191 words = ~76-88 s at 130-150 wpm; 30 s version 66 words = ~26-30 s (computed by script, not read aloud).
@@ -68,7 +68,6 @@ uvicorn civiclens.web.server:app --app-dir src --port 8000
 - No sample images yet.
 
 ## Open questions
-- Is submission still open?
 - Add GEMINI_API_KEY and sample images.
 
 ## Phase 7 verification log (2026-11-05)
@@ -77,7 +76,7 @@ uvicorn civiclens.web.server:app --app-dir src --port 8000
 - REAL vision call VERIFIED through the app: pothole and garbage samples analysed by Groq in ~1.6-3.9 s; valid JSON, sensible ledger.
 - REAL complaint generation VERIFIED in English and Hindi via the API and in a headless-Chromium run of the full UI flow (example -> verify -> draft -> Hindi -> edit -> translate confirm). Single runs, not an evaluation: no accuracy numbers.
 - Fallback VERIFIED: with an invalid Groq model id the request was answered by OpenRouter (garbage sample, English draft passed the validator).
-- Defect found by real use and fixed: a Hindi draft kept English evidence bullets and the validator passed it. Validator now requires Hindi in evidence, claims, impact and request (user-typed text exempt); the retry then produced all-Hindi bullets. Tests: 72 passed, ruff clean.
+- Defect found by real use and fixed: a Hindi draft kept English evidence bullets and the validator passed it. Validator now requires Hindi in evidence, claims, impact and request (user-typed text exempt); the retry then produced all-Hindi bullets. Tests: 72 passed at the time (79 now), ruff clean.
 - Not verified: OpenRouter's complaint-writing quality and Hindi (only its vision stage and an English draft ran); Hindi UI strings unreviewed by a native speaker; screen readers and non-Chromium browsers; any deployment.
 - Observation: a model said "three stone blocks" for a photo showing two (Gemini, earlier); photo-reading accuracy is unmeasured.
 - Live deployment VERIFIED 2026-11-05 (https://civiclens-prns.onrender.com/): headless Chromium at 1280px and 390px ran garbage example -> verify -> English draft -> Hindi translation; no fallback banner, no console errors, no horizontal overflow. Observed: one Hindi draft kept an English term in parentheses ("retaining wall"); the validator allows it because the line is mostly Devanagari. OpenRouter fallback not exercised on the live site.
@@ -89,5 +88,6 @@ uvicorn civiclens.web.server:app --app-dir src --port 8000
 - Open question: every OFF draft needed a retry (2 model calls per draft); the first-attempt failure reason was not diagnosed because the daily quota ran out. Re-run the diagnosis after the quota resets.
 - Operational: OpenRouter free = 50 requests/day. Once it is exhausted the fallback is gone for the day, so a Groq rate limit on the live site then produces a visible "busy" error. Adding $10 of OpenRouter credit (1000/day) or Groq's dev tier removes this.
 - UI gap-closing pass (2026-11-05, headless Chromium, local): Copy (clipboard has edits), .txt (UTF-8 BOM, edits), .md, Print (stub called once; print stylesheet), Hindi download, Edit/Preview/Copy views, keyboard-only flow to Hindi draft with a 3px focus ring on every control, privacy warning on a real face photo, friendly error screen when both providers were rate limited. Defects found and fixed: print layout still showed the Copy/Download/Print buttons; programmatic heading focus drew an outline. A first "print called twice" reading was a Playwright artifact, not an app bug.
+- Docs refreshed to match the FastAPI/Groq/OpenRouter app: FINAL_STATUS, README, DECISIONS (marked historical).
 - Still open: native Hindi review; real phone camera; Safari/Firefox; screen reader; OpenRouter first-attempt retries (diagnose after its daily quota resets 2026-11-06 00:00 UTC); labeled eval set.
 - Gemini added as the second fallback (groq,openrouter,gemini; skipped while GEMINI_API_KEY is empty). Wired and unit-tested only: the three-provider chain has NOT been run live. After adding the key (locally in .env, and on Render under Environment), re-test by forcing Groq and OpenRouter to fail (e.g. GROQ_MODEL=x OPENROUTER_MODEL=x).
