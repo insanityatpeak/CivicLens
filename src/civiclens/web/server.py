@@ -33,7 +33,7 @@ SAMPLES_DIR = ROOT / "data" / "samples"
 MAX_RUNS_PER_SESSION = 10  # soft cap on real-model analyses per browser session (not a global rate limit)
 
 # Example photos offered on the empty state. Only files that exist and have a recorded license are listed.
-SAMPLES = {
+SAMPLES: dict[str, dict[str, str | None]] = {
     "pothole": {"file": "pothole.jpg", "demo_scenario": "pothole"},
     "garbage": {"file": "garbage.jpg", "demo_scenario": None},
 }
@@ -106,7 +106,7 @@ def status(request: Request, response: Response) -> dict:
         "categories": list(get_args(Category)),
         "samples": [
             {"id": k, "url": f"/samples/{v['file']}", "demo_scenario": v["demo_scenario"]}
-            for k, v in SAMPLES.items() if (SAMPLES_DIR / v["file"]).is_file()
+            for k, v in SAMPLES.items() if (SAMPLES_DIR / str(v["file"])).is_file()
         ],
     }
 
@@ -117,7 +117,7 @@ def analyze(request: Request, file: Annotated[UploadFile | None, File()] = None,
     provider = _provider(demo or None)
     if sample:
         meta = SAMPLES.get(sample)
-        path = SAMPLES_DIR / meta["file"] if meta else None
+        path = SAMPLES_DIR / str(meta["file"]) if meta else None
         if not path or not path.is_file():
             raise HTTPException(404, "Unknown example photo.")
         data = path.read_bytes()

@@ -66,7 +66,7 @@ def _complaint(prompt: str) -> dict:
     impact = ""
     if inferred:
         o = inferred[0]
-        impact = tr(o["text"]) + ("; इससे जोखिम हो सकता है।" if hi else ", which could be unsafe.")
+        impact = (tr(o["text"]) or "") + ("; इससे जोखिम हो सकता है।" if hi else ", which could be unsafe.")
         claims.append({"statement": impact, "source": o["id"]})
     location = user.get("location_text")
     if location:

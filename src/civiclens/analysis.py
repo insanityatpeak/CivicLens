@@ -60,11 +60,11 @@ def prepare_image(data: bytes) -> bytes:
     if len(data) > MAX_BYTES:
         raise AnalysisError("too_large", f"The image is larger than {MAX_BYTES // (1024 * 1024)} MB. Please use a smaller photo.")
     try:
-        img = Image.open(io.BytesIO(data))
-        fmt = img.format
+        opened = Image.open(io.BytesIO(data))
+        fmt = opened.format
         if fmt not in ALLOWED_FORMATS:
             raise AnalysisError("unsupported_type", "Please upload a JPEG, PNG or WEBP photo.")
-        img = ImageOps.exif_transpose(img)
+        img = ImageOps.exif_transpose(opened)
         img = img.convert("RGB")
     except AnalysisError:
         raise

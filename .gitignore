@@ -16,3 +16,5 @@ data/samples/*.jpeg
 data/samples/*.webp
 !data/samples/pothole.jpg
 !data/samples/garbage.jpg
+.coverage
+.mypy_cache/
